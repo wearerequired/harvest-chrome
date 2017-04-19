@@ -31,14 +31,13 @@
     HelpscoutProfile.prototype.platformConfig = function() {
       return {
         applicationName: "Helpscout",
-        permalink: "https://secure.helpscout.net/conversation/%ITEM_ID%/%GROUP_ID%/%ACCOUNT_ID%"
+        permalink: "https://secure.helpscout.net/conversation/%ITEM_ID%/%GROUP_ID%"
       };
     };
 
     HelpscoutProfile.prototype.listen = function() {
       document.body.addEventListener("harvest-event:ready", this.addTimerIfOnIssue);
       this.headerButton = this.createButton();
-      this.headerButton.classList.add('btn-sm');
       this.commentButton = this.createButton();
       return new MutationObserver(this.handleMutations).observe(document.body, {
         childList: true,
@@ -90,9 +89,6 @@
         },
         group: {
           id: conversation_number,
-        },
-        account: {
-          id: ''
         }
       });
     };
@@ -126,10 +122,15 @@
     };
 
     HelpscoutProfile.prototype.createButton = function() {
-      var button;
+      var button, link, icon;
       button = document.createElement("li");
-      button.classList.add('harvest-timer');
-      button.innerHTML = '<a class="harvest" href="javascript:void(0)" id="harvest" rel="tooltip" data-placement="bottom" data-original-title="track time"><i class="icon-arrow"></i></a>';
+      button.className = "harvest-timer";
+      button.setAttribute("data-skip-styling", true);
+      link = document.createElement("a");
+      icon = document.createElement("i");
+      icon.className = "icon-clock-sm";
+      link.appendChild(icon);
+      button.appendChild(link);
       return button;
     };
 
