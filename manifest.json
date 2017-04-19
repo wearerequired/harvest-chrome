@@ -73,6 +73,14 @@
         "js/profiles/github.js"
       ],
       "css": [ "css/github.css" ]
+    },
+    {
+      "matches": [ "https://secure.helpscout.net/*" ],
+      "js": [
+        "js/forwarding.js",
+        "js/profiles/helpscout.js"
+      ],
+      "css": [ "css/helpscout.css" ]
     }
   ],
   "web_accessible_resources": [
