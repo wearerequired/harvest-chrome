@@ -56,7 +56,7 @@
           results1 = [];
           for (j = 0, len1 = removedNodes.length; j < len1; j++) {
             node = removedNodes[j];
-            if (node.contains(this.headerButton) || node.contains(this.commentButton)) {
+            if (this.hasBeenRemoved(node, this.headerButton) || this.hasBeenRemoved(node, this.commentButton)) {
               results1.push(this.addTimerIfOnIssue());
             } else {
               results1.push(void 0);
@@ -66,6 +66,10 @@
         }).call(this));
       }
       return results;
+    };
+
+    GithubProfile.prototype.hasBeenRemoved = function(node, button) {
+      return node.contains(button) && !document.body.contains(button);
     };
 
     GithubProfile.prototype.infect = function() {
