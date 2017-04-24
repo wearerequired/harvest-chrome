@@ -1,7 +1,7 @@
 {
 "update_url": "https://clients2.google.com/service/update2/crx",
 
-  "version": "2.4.2",
+  "version": "2.4.3",
   "name": "Harvest Time Tracker",
   "description": "Track time from Chrome and within popular project management tools.",
   "manifest_version": 2,
@@ -65,6 +65,14 @@
         "js/profiles/trello.js"
       ],
       "css": [ "css/trello.css" ]
+    },
+    {
+      "matches": [ "https://github.com/*" ],
+      "js": [
+        "js/forwarding.js",
+        "js/profiles/github.js"
+      ],
+      "css": [ "css/github.css" ]
     }
   ],
   "web_accessible_resources": [
