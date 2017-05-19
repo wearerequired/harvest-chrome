@@ -1,0 +1,11 @@
+.harvest-timer.running .icon-clock-sm {
+    color: #3197d6;
+    display: inline-block;
+    animation: rotate 4s linear infinite;
+}
+
+@keyframes rotate {
+    100% {
+        transform: rotate(360deg);
+    }
+}
