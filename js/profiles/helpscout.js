@@ -38,7 +38,6 @@
     HelpscoutProfile.prototype.listen = function() {
       document.body.addEventListener("harvest-event:ready", this.addTimerIfOnIssue);
       this.headerButton = this.createButton();
-      this.commentButton = this.createButton();
       return new MutationObserver(this.handleMutations).observe(document.body, {
         childList: true,
         subtree: true
@@ -55,7 +54,7 @@
           results1 = [];
           for (j = 0, len1 = removedNodes.length; j < len1; j++) {
             node = removedNodes[j];
-            if (node.contains(this.headerButton) || node.contains(this.commentButton)) {
+            if (this.hasBeenRemoved(node, this.headerButton)) {
               results1.push(this.addTimerIfOnIssue());
             } else {
               results1.push(void 0);
@@ -99,24 +98,20 @@
     };
 
     HelpscoutProfile.prototype.addTimer = function(data) {
-      var actions, el, formActions, i, len, name, ref;
+      var actions, el, i, len, name, ref;
       for (name in data) {
-        this.headerButton.dataset[name] = this.commentButton.dataset[name] = JSON.stringify(data[name]);
+        this.headerButton.dataset[name] = JSON.stringify(data[name]);
       }
       ref = document.querySelectorAll('.harvest-timer');
       for (i = 0, len = ref.length; i < len; i++) {
         el = ref[i];
-        if (el !== this.headerButton && el !== this.commentButton) {
+        if (el !== this.headerButton) {
           el.remove();
         }
       }
       actions = document.querySelector("ul.convo-actions");
       if (actions != null) {
         actions.insertBefore(this.headerButton, actions.children[0]);
-      }
-      formActions = document.querySelector('#partial-new-comment-form-actions');
-      if (formActions != null) {
-        formActions.appendChild(this.commentButton);
       }
       return this.notifyPlatformOfNewTimers();
     };
