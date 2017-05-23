@@ -1,0 +1,33 @@
+div.harvest-timer.styled {
+  font-size: inherit;
+  width: 1.4em;
+  height: 1.4em;
+  border-radius: 0.3em;
+  margin-right: 7px;
+  position: relative; }
+  div.harvest-timer.styled .harvest-timer-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); }
+
+.action_button.harvest-timer .harvest-timer-icon {
+  margin: 2px 0.6rem 0 0; }
+.action_button.harvest-timer .stopped-text {
+  display: inline; }
+.action_button.harvest-timer .running-text {
+  display: none; }
+.action_button.harvest-timer.running {
+  background-color: #409ad7;
+  border-color: #0060a4;
+  color: #fff; }
+  .action_button.harvest-timer.running:hover {
+    background-color: #3393d4; }
+  .action_button.harvest-timer.running:active {
+    background-color: #006fba; }
+  .action_button.harvest-timer.running .stopped-text {
+    display: none; }
+  .action_button.harvest-timer.running .running-text {
+    display: inline; }
+  .action_button.harvest-timer.running .harvest-timer-icon {
+    background-position: -12px 0px; }

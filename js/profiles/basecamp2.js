@@ -1,9 +1,9 @@
 (function() {
-  var BasecampProfile,
+  var Basecamp2Profile,
     bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
-  BasecampProfile = (function() {
-    function BasecampProfile(host1) {
+  Basecamp2Profile = (function() {
+    function Basecamp2Profile(host1) {
       this.host = host1;
       this.addTimer = bind(this.addTimer, this);
       this.addTimers = bind(this.addTimers, this);
@@ -15,7 +15,7 @@
       window.setInterval(this.addTimers, this.interval);
     }
 
-    BasecampProfile.prototype.loadHarvestPlatform = function() {
+    Basecamp2Profile.prototype.loadHarvestPlatform = function() {
       var configScript, ph, platformConfig, platformScript;
       platformConfig = {
         applicationName: "Basecamp",
@@ -37,7 +37,7 @@
       })(this));
     };
 
-    BasecampProfile.prototype.addTimers = function() {
+    Basecamp2Profile.prototype.addTimers = function() {
       var i, item, items, len, results;
       if (!this.platformLoaded) {
         return;
@@ -53,7 +53,7 @@
       return results;
     };
 
-    BasecampProfile.prototype.addTimer = function(item) {
+    Basecamp2Profile.prototype.addTimer = function(item) {
       var data;
       data = this.getDataForTimer(item);
       if (this.isTodoCompleted(item) || this.notEnoughInfo(data)) {
@@ -63,7 +63,7 @@
       return this.notifyPlatformOfNewTimers();
     };
 
-    BasecampProfile.prototype.getDataForTimer = function(item) {
+    Basecamp2Profile.prototype.getDataForTimer = function(item) {
       var groupName, itemName, link, linkParts;
       itemName = (item.querySelector("a[title]") || item.querySelector("a")).innerText;
       groupName = document.querySelector(this.groupNameSelector).innerText;
@@ -84,7 +84,7 @@
       };
     };
 
-    BasecampProfile.prototype.isTodoCompleted = function(item) {
+    Basecamp2Profile.prototype.isTodoCompleted = function(item) {
       if (item.webkitMatchesSelector(".complete")) {
         return true;
       } else if (item.parentNode && item.parentNode !== document) {
@@ -92,12 +92,12 @@
       }
     };
 
-    BasecampProfile.prototype.notEnoughInfo = function(data) {
+    Basecamp2Profile.prototype.notEnoughInfo = function(data) {
       var ref, ref1;
       return !(((data != null ? (ref = data.group) != null ? ref.id : void 0 : void 0) != null) && ((data != null ? (ref1 = data.item) != null ? ref1.id : void 0 : void 0) != null));
     };
 
-    BasecampProfile.prototype.buildTimer = function(item, data) {
+    Basecamp2Profile.prototype.buildTimer = function(item, data) {
       var timer;
       timer = document.createElement("div");
       timer.className = "harvest-timer";
@@ -109,20 +109,20 @@
       return item.insertBefore(timer, item.children[0]);
     };
 
-    BasecampProfile.prototype.notifyPlatformOfNewTimers = function() {
+    Basecamp2Profile.prototype.notifyPlatformOfNewTimers = function() {
       var evt;
       evt = new CustomEvent("harvest-event:timers:chrome:add");
       return document.querySelector("#harvest-messaging").dispatchEvent(evt);
     };
 
-    return BasecampProfile;
+    return Basecamp2Profile;
 
   })();
 
   chrome.runtime.sendMessage({
     type: "getHost"
   }, function(host) {
-    return new BasecampProfile(host);
+    return new Basecamp2Profile(host);
   });
 
 }).call(this);

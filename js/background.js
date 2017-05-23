@@ -35,6 +35,23 @@
       switch (message != null ? message.type : void 0) {
         case 'getHost':
           return respond(this.host);
+        case 'getHostIfEnabled':
+          if (message != null ? message.featureFlag : void 0) {
+            fetch(this.host + "/platform/feature_enabled.json?name=" + message.featureFlag, {
+              credentials: "include"
+            }).then((function(_this) {
+              return function(response) {
+                if (!response.ok) {
+                  return;
+                }
+                return response.json().then(function(data) {
+                  return respond(data.enabled ? _this.host : false);
+                });
+              };
+            })(this));
+            return true;
+          }
+          break;
         case 'timer:started':
           return this.setRunningTimerIcon(true);
         case 'timer:stopped':
