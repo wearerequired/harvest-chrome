@@ -45,16 +45,16 @@
     };
 
     HelpscoutProfile.prototype.handleMutations = function(mutations) {
-      var i, len, node, removedNodes, results;
+      var i, len, node, addedNodes, results;
       results = [];
       for (i = 0, len = mutations.length; i < len; i++) {
-        removedNodes = mutations[i].removedNodes;
+        addedNodes = mutations[i].addedNodes;
         results.push((function() {
           var j, len1, results1;
           results1 = [];
-          for (j = 0, len1 = removedNodes.length; j < len1; j++) {
-            node = removedNodes[j];
-            if (this.hasBeenRemoved(node, this.headerButton)) {
+          for (j = 0, len1 = addedNodes.length; j < len1; j++) {
+            node = addedNodes[j];
+            if (node.nodeType === Node.ELEMENT_NODE && node.classList.contains('c-convo-toolbar')) {
               results1.push(this.addTimerIfOnIssue());
             } else {
               results1.push(void 0);
