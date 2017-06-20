@@ -52,6 +52,6 @@
    "name": "Harvest Time Tracker",
    "permissions": [ "http://*/*", "https://*/*", "cookies", "webRequest", "webRequestBlocking" ],
    "update_url": "https://clients2.google.com/service/update2/crx",
-   "version": "2.5.0",
+   "version": "2.5.3",
    "web_accessible_resources": [ "images/trello-timer-icon.png" ]
 }

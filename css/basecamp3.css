@@ -1,8 +1,8 @@
 div.harvest-timer.styled {
   font-size: inherit;
-  width: 1.4em;
-  height: 1.4em;
-  border-radius: 0.3em;
+  width: 24px;
+  height: 24px;
+  border-radius: 5px;
   margin-right: 7px;
   position: relative; }
   div.harvest-timer.styled .harvest-timer-icon {
