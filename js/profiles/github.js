@@ -30,8 +30,7 @@
 
     GithubProfile.prototype.platformConfig = function() {
       return {
-        applicationName: "GitHub",
-        permalink: "https://github.com/%ACCOUNT_ID%/%GROUP_ID%/issues/%ITEM_ID%"
+        applicationName: "GitHub"
       };
     };
 
@@ -108,10 +107,14 @@
     };
 
     GithubProfile.prototype.addTimer = function(data) {
-      var actions, el, formActions, i, len, name, ref;
+      var account, actions, el, formActions, group, i, item, len, name, permalink, ref;
       for (name in data) {
         this.headerButton.dataset[name] = this.commentButton.dataset[name] = JSON.stringify(data[name]);
       }
+      account = data.account, group = data.group, item = data.item;
+      permalink = "https://github.com/" + account.id + "/" + group.id + "/issues/" + item.id;
+      this.headerButton.setAttribute('data-permalink', permalink);
+      this.commentButton.setAttribute('data-permalink', permalink);
       ref = document.querySelectorAll('.harvest-timer');
       for (i = 0, len = ref.length; i < len; i++) {
         el = ref[i];

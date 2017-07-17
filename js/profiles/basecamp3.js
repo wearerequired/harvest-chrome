@@ -307,12 +307,9 @@
   })();
 
   chrome.runtime.sendMessage({
-    type: "getHostIfEnabled",
-    featureFlag: "basecamp3_integration_enabled"
+    type: "getHost"
   }, function(host) {
-    if (host) {
-      return new Basecamp3Profile(host);
-    }
+    return new Basecamp3Profile(host);
   });
 
 }).call(this);
