@@ -18,8 +18,7 @@
     Basecamp2Profile.prototype.loadHarvestPlatform = function() {
       var configScript, ph, platformConfig, platformScript;
       platformConfig = {
-        applicationName: "Basecamp",
-        permalink: "https://basecamp.com/%ACCOUNT_ID%/projects/%GROUP_ID%/todos/%ITEM_ID%"
+        applicationName: "Basecamp"
       };
       configScript = document.createElement("script");
       configScript.innerHTML = "window._harvestPlatformConfig = " + (JSON.stringify(platformConfig)) + ";";
@@ -106,6 +105,7 @@
       timer.setAttribute("data-account", JSON.stringify(data.account));
       timer.setAttribute("data-group", JSON.stringify(data.group));
       timer.setAttribute("data-item", JSON.stringify(data.item));
+      timer.setAttribute("data-permalink", "https://basecamp.com/" + data.account.id + "/projects/" + data.group.id + "/todos/" + data.item.id);
       return item.insertBefore(timer, item.children[0]);
     };
 

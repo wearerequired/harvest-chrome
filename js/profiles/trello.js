@@ -69,9 +69,7 @@
 
     TrelloProfile.prototype.platformConfig = function() {
       return {
-        applicationName: "Trello",
-        permalink: "https://trello.com/c/%ITEM_ID%",
-        skipStyling: true
+        applicationName: "Trello"
       };
     };
 
@@ -156,6 +154,8 @@
     TrelloProfile.prototype.hydrateTimer = function(board, card) {
       this.timer.setAttribute("data-group", JSON.stringify(board));
       this.timer.setAttribute("data-item", JSON.stringify(card));
+      this.timer.setAttribute("data-permalink", "https://trello.com/c/" + card.id);
+      this.timer.setAttribute("data-skip-styling", true);
       this.timer.classList.remove("disabled");
       this.timer.classList.add("harvest-timer");
       return this.notifyPlatformOfNewTimers();

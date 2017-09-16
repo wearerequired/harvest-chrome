@@ -20,8 +20,7 @@
     Basecamp3Profile.prototype.loadHarvestPlatform = function() {
       var configScript, ph, platformConfig, platformScript;
       platformConfig = {
-        applicationName: "Basecamp",
-        permalink: "https://3.basecamp.com/%ACCOUNT_ID%/buckets/%GROUP_ID%/%ITEM_ID%"
+        applicationName: "Basecamp"
       };
       configScript = document.createElement("script");
       configScript.innerHTML = "window._harvestPlatformConfig = " + (JSON.stringify(platformConfig)) + ";";
@@ -293,7 +292,8 @@
       timer.setAttribute("id", "harvest-basecamp-timer-" + data.item.id);
       timer.setAttribute("data-account", JSON.stringify(data.account));
       timer.setAttribute("data-group", JSON.stringify(data.group));
-      return timer.setAttribute("data-item", JSON.stringify(data.item));
+      timer.setAttribute("data-item", JSON.stringify(data.item));
+      return timer.setAttribute("data-permalink", "https://3.basecamp.com/" + data.account.id + "/buckets/" + data.group.id + "/" + data.item.id);
     };
 
     Basecamp3Profile.prototype.notifyPlatformOfNewTimers = function() {
