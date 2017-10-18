@@ -113,7 +113,9 @@
       }
       account = data.account, group = data.group, item = data.item;
       permalink = "https://github.com/" + account.id + "/" + group.id + "/issues/" + item.id;
+      this.headerButton.removeAttribute('data-listening');
       this.headerButton.setAttribute('data-permalink', permalink);
+      this.commentButton.removeAttribute('data-listening');
       this.commentButton.setAttribute('data-permalink', permalink);
       ref = document.querySelectorAll('.harvest-timer');
       for (i = 0, len = ref.length; i < len; i++) {
