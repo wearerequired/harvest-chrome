@@ -12,7 +12,7 @@
       this.addTimersSoon = bind(this.addTimersSoon, this);
       this.removeTimers = bind(this.removeTimers, this);
       this.platformLoaded = bind(this.platformLoaded, this);
-      this.groupNameSelector = ".project-header h1";
+      this.groupNameSelector = "h1 strong a";
       this.platformXDMElement = null;
       this.loadHarvestPlatform();
     }
@@ -153,7 +153,7 @@
       var icon, running, stopped, timer, toolbar;
       timer = document.createElement("button");
       timer.type = "button";
-      timer.className = "harvest-timer action_button small";
+      timer.className = "harvest-timer btn small";
       timer.setAttribute("data-skip-styling", true);
       this.addTimerAttributes(timer, data);
       icon = document.createElement("span");
@@ -168,7 +168,7 @@
       timer.appendChild(stopped);
       timer.appendChild(running);
       toolbar = page.querySelector(".perma-toolbar");
-      return toolbar.insertBefore(timer, toolbar.querySelector(".perma-toolbar__more-edit-button-actions").nextSibling);
+      return toolbar.insertBefore(timer, toolbar.querySelector(".action-sheet"));
     };
 
     Basecamp3Profile.prototype.addMyAssignmentTimers = function() {
@@ -195,7 +195,7 @@
           }
         }
       }
-      ref1 = document.querySelectorAll(".todolist--by-date .metadata");
+      ref1 = document.querySelectorAll(".schedule--coalesced .metadata.push_quarter--ends");
       results = [];
       for (l = 0, len3 = ref1.length; l < len3; l++) {
         group = ref1[l];
