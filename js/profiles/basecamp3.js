@@ -90,12 +90,12 @@
     };
 
     Basecamp3Profile.prototype.buildToDoListTimer = function(item, data) {
-      var content, timer;
+      var permalink, timer;
       timer = document.createElement("div");
       timer.className = "harvest-timer";
       this.addTimerAttributes(timer, data);
-      content = item.querySelector(".todolist__title");
-      return content.insertBefore(timer, content.querySelector(".todolist__permalink"));
+      permalink = item.querySelector('.todolist__permalink');
+      return permalink.parentElement.insertBefore(timer, permalink);
     };
 
     Basecamp3Profile.prototype.addToDoItemTimers = function() {
