@@ -1,7 +1,7 @@
 {
 "update_url": "https://clients2.google.com/service/update2/crx",
 
-  "version": "2.5.9",
+  "version": "2.5.11",
   "name": "required Time Tracker for Harvest",
   "description": "Track time from Chrome and within popular project management tools.",
   "manifest_version": 2,

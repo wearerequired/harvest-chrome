@@ -94,7 +94,7 @@
       timer = document.createElement("div");
       timer.className = "harvest-timer";
       this.addTimerAttributes(timer, data);
-      permalink = item.querySelector('.todolist__permalink');
+      permalink = item.querySelector('.todolist__title a');
       return permalink.parentElement.insertBefore(timer, permalink);
     };
 

@@ -35,7 +35,7 @@
       this.hydrateTimer = bind(this.hydrateTimer, this);
       this.addTimer = bind(this.addTimer, this);
       this.addTimerIfOnCard = bind(this.addTimerIfOnCard, this);
-      this.actionSelector = ".other-actions .u-clearfix";
+      this.actionSelector = ".window-sidebar";
       this.platformLoaded = false;
       this.listen();
       this.infect();
@@ -139,16 +139,13 @@
     };
 
     TrelloProfile.prototype.buildTimer = function() {
-      var actions, icon;
+      var actions, container;
+      container = document.createElement('div');
+      container.className = 'window-module u-clearfix';
+      container.innerHTML = "<h3 class=\"mod-no-top-margin\">Harvest</h3>\n<div class=\"u-clearfix\">\n  <a class=\"button-link\" id=\"harvest-trello-timer\">\n    <span class=\"trello-timer-icon\"></span> Track Time\n  </a>\n</div>";
+      this.timer = container.querySelector('a');
       actions = document.querySelector(this.actionSelector);
-      this.timer = document.createElement("a");
-      this.timer.className = "disabled button-link";
-      this.timer.setAttribute("id", "harvest-trello-timer");
-      icon = document.createElement("span");
-      icon.className = "trello-timer-icon";
-      this.timer.appendChild(icon);
-      this.timer.appendChild(document.createTextNode(" Track Time"));
-      return actions.insertBefore(this.timer, actions.children[0]);
+      return actions.appendChild(container);
     };
 
     TrelloProfile.prototype.hydrateTimer = function(board, card) {
