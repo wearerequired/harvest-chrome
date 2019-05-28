@@ -68,7 +68,7 @@
     };
 
     GithubProfile.prototype.hasBeenRemoved = function(node, button) {
-      return node.contains(button) && !document.body.contains(button);
+      return node.contains(button) && !document.body.contains(button) && button !== node;
     };
 
     GithubProfile.prototype.infect = function() {
