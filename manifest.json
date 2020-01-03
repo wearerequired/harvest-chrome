@@ -36,6 +36,7 @@
     "*://github.com/*",
     "*://basecamp.com/*",
     "https://secure.helpscout.net/mailbox/*",
+    "https://*.harvestapp.com/*",
     "cookies",
     "webRequest",
     "webRequestBlocking"
