@@ -10,10 +10,12 @@
       var iframe;
       iframe = document.querySelector("iframe");
       waitUntilChromeAutofocuses(iframe);
-      iframe.src = _this.host + "/platform/timer?service=chrome.google.com";
-      return iframe.addEventListener("load", function() {
-        return iframe.classList.add("is-loaded");
-      });
+      return setTimeout(function() {
+        iframe.src = _this.host + "/platform/timer?service=chrome.google.com";
+        return iframe.addEventListener("load", function() {
+          return iframe.classList.add("is-loaded");
+        });
+      }, 0);
     };
   })(this));
 

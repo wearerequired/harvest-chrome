@@ -87,7 +87,7 @@
             return _this.setRunningTimerIcon(((function() {
               try {
                 return JSON.parse(xhr.responseText);
-              } catch (error) {}
+              } catch (_error) {}
             })()) != null);
           }
         };

@@ -107,7 +107,7 @@
     };
 
     GithubProfile.prototype.addTimer = function(data) {
-      var account, actions, el, formActions, group, i, item, len, name, permalink, ref;
+      var account, actions, el, formActions, group, i, item, len, name, permalink, ref, wrapper;
       for (name in data) {
         this.headerButton.dataset[name] = this.commentButton.dataset[name] = JSON.stringify(data[name]);
       }
@@ -128,9 +128,11 @@
       if (actions != null) {
         actions.insertBefore(this.headerButton, actions.children[0]);
       }
-      formActions = document.querySelector('#partial-new-comment-form-actions');
-      if (formActions != null) {
-        formActions.appendChild(this.commentButton);
+      if (formActions = document.querySelector('#partial-new-comment-form-actions')) {
+        wrapper = document.createElement("div");
+        wrapper.classList.add('bg-gray-light', 'mr-1');
+        wrapper.appendChild(this.commentButton);
+        formActions.children[0].prepend(wrapper);
       }
       return this.notifyPlatformOfNewTimers();
     };
