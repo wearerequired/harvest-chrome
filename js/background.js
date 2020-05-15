@@ -9,19 +9,16 @@
 
     PlatformExtension.prototype.version = chrome.app.getDetails().version;
 
-    PlatformExtension.prototype.pollLength = 20;
-
     PlatformExtension.prototype.splashUrl = 'https://www.getharvest.com/harvest-for-chrome-installed';
 
     function PlatformExtension() {
       this.installed = bind(this.installed, this);
-      this.stopPolling = bind(this.stopPolling, this);
       this.getTimerStatus = bind(this.getTimerStatus, this);
       this.handleHeaders = bind(this.handleHeaders, this);
       this.handleMessage = bind(this.handleMessage, this);
-      window.addEventListener("online", this.getTimerStatus);
-      window.addEventListener("offline", this.stopPolling);
-      document.addEventListener("login:change", this.getTimerStatus);
+      this.connect = bind(this.connect, this);
+      this.connect();
+      document.addEventListener("login:change", this.connect);
       new PlatformCookie();
       chrome.runtime.onMessage.addListener(this.handleMessage);
       chrome.runtime.onInstalled.addListener(this.installed);
@@ -30,6 +27,31 @@
         types: ['main_frame']
       }, ['blocking', 'responseHeaders']);
     }
+
+    PlatformExtension.prototype.connect = function() {
+      var ref, url;
+      url = new URL('/platform/events', this.host);
+      url.searchParams.set('source', 'chrome-extension');
+      url.searchParams.set('client_version', chrome.app.getDetails().version);
+      if ((ref = this.eventSource) != null) {
+        ref.close();
+      }
+      this.eventSource = new EventSource(url.toString());
+      this.eventSource.onopen = (function(_this) {
+        return function() {
+          return _this.getTimerStatus();
+        };
+      })(this);
+      return this.eventSource.onmessage = (function(_this) {
+        return function(arg) {
+          var data, ref1;
+          data = arg.data;
+          if (((ref1 = JSON.parse(data)) != null ? ref1.type : void 0) === 'event') {
+            return _this.getTimerStatus();
+          }
+        };
+      })(this);
+    };
 
     PlatformExtension.prototype.handleMessage = function(message, sender, respond) {
       switch (message != null ? message.type : void 0) {
@@ -70,18 +92,15 @@
 
     PlatformExtension.prototype.getTimerStatus = function() {
       var xhr;
-      clearTimeout(this.pendingPoll);
-      if (!navigator.onLine) {
-        return;
-      }
       xhr = new XMLHttpRequest;
       xhr.onload = (function(_this) {
         return function() {
+          var ref;
           if (xhr.status === 401) {
-            _this.stopPolling();
+            if ((ref = _this.eventSource) != null) {
+              ref.close();
+            }
             _this.setRunningTimerIcon(false);
-          } else {
-            _this.pendingPoll = setTimeout(_this.getTimerStatus, _this.pollLength * 1000);
           }
           if (xhr.status === 200) {
             return _this.setRunningTimerIcon(((function() {
@@ -92,19 +111,10 @@
           }
         };
       })(this);
-      xhr.onerror = (function(_this) {
-        return function() {
-          return _this.pendingPoll = setTimeout(_this.getTimerStatus, _this.pollLength * 1000);
-        };
-      })(this);
       xhr.open('get', this.host + "/platform/last_running_timer.json");
       xhr.withCredentials = true;
       xhr.setRequestHeader("X-HarvestChromeExt", this.version);
       return xhr.send();
-    };
-
-    PlatformExtension.prototype.stopPolling = function() {
-      return clearTimeout(this.pendingPoll);
     };
 
     PlatformExtension.prototype.setRunningTimerIcon = function(running) {
