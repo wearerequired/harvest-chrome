@@ -19,7 +19,7 @@
       case "object":
         for (name in opts) {
           value = opts[name];
-          script[name] = value;
+          script.setAttribute(name, value);
         }
         break;
       case "string":
@@ -59,9 +59,9 @@
     };
 
     TrelloProfile.prototype.infect = function() {
-      injectScript("window._harvestPlatformConfig = " + (JSON.stringify(this.platformConfig())) + ";");
       injectScript({
         src: this.host + "/assets/platform.js",
+        "data-platform-config": JSON.stringify(this.platformConfig()),
         async: true
       });
       return injectScript("(" + this.trelloUrlMonitor + ")();");
@@ -126,7 +126,7 @@
 
     TrelloProfile.prototype.fetchCardData = function(cardId, cb) {
       var url;
-      url = "/1/Cards/" + cardId + "?fields=name,shortLink&board=true&board_fields=name";
+      url = "https://trello.com/1/cards/" + cardId + "?fields=name,shortLink&board=true&board_fields=name";
       return getJson(url, function(cardData) {
         var board, card;
         board = cardData.board;
@@ -142,7 +142,7 @@
       var actions, container;
       container = document.createElement('div');
       container.className = 'window-module u-clearfix';
-      container.innerHTML = "<h3 class=\"mod-no-top-margin\">Harvest</h3>\n<div class=\"u-clearfix\">\n  <a class=\"button-link\" id=\"harvest-trello-timer\">\n    <span class=\"trello-timer-icon\"></span> Track Time\n  </a>\n</div>";
+      container.innerHTML = "<h3 class=\"mod-no-top-margin\">Harvest</h3>\n<div class=\"u-clearfix\">\n  <a class=\"button-link\" id=\"harvest-trello-timer\">\n    <span class=\"harvest-trello-timer-icon icon-sm icon-clock\"></span><span class=\"js-sidebar-action-text\">Track Time</span>\n  </a>\n</div>";
       this.timer = container.querySelector('a');
       actions = document.querySelector(this.actionSelector);
       return actions.appendChild(container);

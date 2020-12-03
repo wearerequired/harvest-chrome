@@ -1,5 +1,5 @@
 (function() {
-  var canBeClosed, setRunningTimerIcon, shouldClose, waitUntilChromeAutofocuses;
+  var canBeClosed, getService, setRunningTimerIcon, shouldClose, waitUntilChromeAutofocuses;
 
   canBeClosed = true;
 
@@ -11,7 +11,7 @@
       iframe = document.querySelector("iframe");
       waitUntilChromeAutofocuses(iframe);
       return setTimeout(function() {
-        iframe.src = _this.host + "/platform/timer?service=chrome.google.com";
+        iframe.src = (_this.host + "/platform/timer?service=") + getService();
         return iframe.addEventListener("load", function() {
           return iframe.classList.add("is-loaded");
         });
@@ -59,6 +59,16 @@
 
   waitUntilChromeAutofocuses = function(element) {
     return element.getBoundingClientRect().width;
+  };
+
+  getService = function() {
+    if (navigator.userAgent.includes('Edg/')) {
+      return "microsoft.com/edge";
+    } else if (navigator.userAgent.includes('Firefox/')) {
+      return "mozilla.org/firefox";
+    } else {
+      return "chrome.google.com";
+    }
   };
 
 }).call(this);

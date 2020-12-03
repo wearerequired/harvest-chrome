@@ -20,7 +20,7 @@
   localStorage.setItem("host", this.host);
 
   chrome.browserAction.setBadgeText({
-    text: this.host === defaultHost ? "" : this.host.match(/\.dev/i) ? "local" : "stage"
+    text: this.host === defaultHost ? "" : this.host.match(/\.localhost/i) ? "local" : "stage"
   });
 
 }).call(this);

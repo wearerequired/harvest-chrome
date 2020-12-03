@@ -1,15 +1,19 @@
 (function() {
-  var PlatformCookie, PlatformExtension,
+  var PlatformCookie, PlatformExtension, reconnectAttempts, reconnectTimeout,
     bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   PlatformCookie = this.PlatformCookie;
 
+  reconnectTimeout = null;
+
+  reconnectAttempts = 0;
+
   PlatformExtension = (function() {
     PlatformExtension.prototype.host = window.host;
 
-    PlatformExtension.prototype.version = chrome.app.getDetails().version;
+    PlatformExtension.prototype.version = chrome.runtime.getManifest().version;
 
-    PlatformExtension.prototype.splashUrl = 'https://www.getharvest.com/harvest-for-chrome-installed';
+    PlatformExtension.prototype.splashUrl = navigator.userAgent.includes('Edg/') ? 'https://www.getharvest.com/harvest-for-edge-installed' : navigator.userAgent.includes('Firefox/') ? 'https://www.getharvest.com/harvest-for-firefox-installed' : 'https://www.getharvest.com/harvest-for-chrome-installed';
 
     function PlatformExtension() {
       this.installed = bind(this.installed, this);
@@ -29,25 +33,46 @@
     }
 
     PlatformExtension.prototype.connect = function() {
-      var ref, url;
+      var ref, source, url;
+      clearTimeout(reconnectTimeout);
       url = new URL('/platform/events', this.host);
-      url.searchParams.set('source', 'chrome-extension');
-      url.searchParams.set('client_version', chrome.app.getDetails().version);
+      url.searchParams.set('client_version', this.version);
+      if (navigator.userAgent.includes('Edg/')) {
+        url.searchParams.set('source', 'edge-extension');
+      } else if (navigator.userAgent.includes('Firefox/')) {
+        url.searchParams.set('source', 'firefox-extension');
+      } else {
+        url.searchParams.set('source', 'chrome-extension');
+      }
       if ((ref = this.eventSource) != null) {
         ref.close();
       }
-      this.eventSource = new EventSource(url.toString());
+      source = this.eventSource = new EventSource(url.toString());
       this.eventSource.onopen = (function(_this) {
         return function() {
-          return _this.getTimerStatus();
+          return reconnectAttempts = 0;
+        };
+      })(this);
+      this.eventSource.onerror = (function(_this) {
+        return function(error) {
+          var delay;
+          if (source.readyState !== 2) {
+            return;
+          }
+          delay = 5000 * Math.pow(2, reconnectAttempts++);
+          delay += Math.random() * 10000 - 5000;
+          delay = Math.min(delay, 60 * 60 * 1000);
+          return reconnectTimeout = setTimeout(_this.connect, delay);
         };
       })(this);
       return this.eventSource.onmessage = (function(_this) {
         return function(arg) {
           var data, ref1;
           data = arg.data;
-          if (((ref1 = JSON.parse(data)) != null ? ref1.type : void 0) === 'event') {
-            return _this.getTimerStatus();
+          switch ((ref1 = JSON.parse(data)) != null ? ref1.type : void 0) {
+            case 'event':
+            case 'stale':
+              return _this.getTimerStatus();
           }
         };
       })(this);
@@ -82,7 +107,7 @@
         return;
       }
       return header.value = ((ref = header.value) != null ? ref : '').replace(/(child|connect|script|style|img|frame)-src/ig, function(match) {
-        return match + " " + (this.host.replace("platform", "*")) + " https://*.getharvest.com http://*.getharvest.dev";
+        return match + " " + (this.host.replace("platform", "*")) + " https://*.getharvest.com http://*.getharvest.localhost";
       });
     };
 
@@ -106,14 +131,20 @@
             return _this.setRunningTimerIcon(((function() {
               try {
                 return JSON.parse(xhr.responseText);
-              } catch (_error) {}
+              } catch (error1) {}
             })()) != null);
           }
         };
       })(this);
       xhr.open('get', this.host + "/platform/last_running_timer.json");
       xhr.withCredentials = true;
-      xhr.setRequestHeader("X-HarvestChromeExt", this.version);
+      if (navigator.userAgent.includes('Edg/')) {
+        xhr.setRequestHeader("X-HarvestEdgeExt", this.version);
+      } else if (navigator.userAgent.includes('Firefox/')) {
+        xhr.setRequestHeader("X-HarvestFirefoxExt", this.version);
+      } else {
+        xhr.setRequestHeader("X-HarvestChromeExt", this.version);
+      }
       return xhr.send();
     };
 

@@ -5,15 +5,9 @@
   injectScript = function(opts) {
     var name, ph, script, value;
     script = document.createElement("script");
-    switch (typeof opts) {
-      case "object":
-        for (name in opts) {
-          value = opts[name];
-          script[name] = value;
-        }
-        break;
-      case "string":
-        script.innerHTML = opts;
+    for (name in opts) {
+      value = opts[name];
+      script.setAttribute(name, value);
     }
     ph = document.getElementsByTagName("script")[0];
     return ph.parentNode.insertBefore(script, ph);
@@ -72,9 +66,9 @@
     };
 
     GithubProfile.prototype.infect = function() {
-      injectScript("window._harvestPlatformConfig = " + (JSON.stringify(this.platformConfig())) + ";");
       injectScript({
         src: this.host + "/assets/platform.js",
+        "data-platform-config": JSON.stringify(this.platformConfig()),
         async: true
       });
       return document.addEventListener('pjax:end', this.addTimerIfOnIssue);

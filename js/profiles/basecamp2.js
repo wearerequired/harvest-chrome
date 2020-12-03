@@ -1,6 +1,17 @@
 (function() {
-  var Basecamp2Profile,
+  var Basecamp2Profile, injectScript,
     bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  injectScript = function(opts) {
+    var name, ph, script, value;
+    script = document.createElement("script");
+    for (name in opts) {
+      value = opts[name];
+      script.setAttribute(name, value);
+    }
+    ph = document.getElementsByTagName("script")[0];
+    return ph.parentNode.insertBefore(script, ph);
+  };
 
   Basecamp2Profile = (function() {
     function Basecamp2Profile(host1) {
@@ -15,19 +26,18 @@
       window.setInterval(this.addTimers, this.interval);
     }
 
-    Basecamp2Profile.prototype.loadHarvestPlatform = function() {
-      var configScript, ph, platformConfig, platformScript;
-      platformConfig = {
+    Basecamp2Profile.prototype.platformConfig = function() {
+      return {
         applicationName: "Basecamp"
       };
-      configScript = document.createElement("script");
-      configScript.innerHTML = "window._harvestPlatformConfig = " + (JSON.stringify(platformConfig)) + ";";
-      platformScript = document.createElement("script");
-      platformScript.src = this.host + "/assets/platform.js";
-      platformScript.async = true;
-      ph = document.getElementsByTagName("script")[0];
-      ph.parentNode.insertBefore(configScript, ph);
-      ph.parentNode.insertBefore(platformScript, ph);
+    };
+
+    Basecamp2Profile.prototype.loadHarvestPlatform = function() {
+      injectScript({
+        src: this.host + "/assets/platform.js",
+        "data-platform-config": JSON.stringify(this.platformConfig()),
+        async: true
+      });
       return document.body.addEventListener("harvest-event:ready", (function(_this) {
         return function() {
           _this.platformLoaded = true;
