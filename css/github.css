@@ -1,3 +1,6 @@
+.harvest-timer {
+  margin-right: 8px;
+}
 .harvest-timer.running {
   background-color: #1385e5;
   background: -webkit-linear-gradient(top, #53b2fc, #1385e5);
