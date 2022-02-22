@@ -32,6 +32,7 @@
       document.body.addEventListener("harvest-event:ready", this.addTimerIfOnIssue);
       this.headerButton = this.createButton();
       this.headerButton.classList.add('btn-sm');
+      this.headerButton.classList.add('mr-1');
       this.commentButton = this.createButton();
       return new MutationObserver(this.handleMutations).observe(document.body, {
         childList: true,
@@ -152,7 +153,7 @@
   })();
 
   chrome.runtime.sendMessage({
-    type: "getHost"
+    type: "harvest:browser:getHost"
   }, function(host) {
     return new GithubProfile(host);
   });

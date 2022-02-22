@@ -50,6 +50,9 @@
       })(this));
       return window.addEventListener("message", (function(_this) {
         return function(event) {
+          if (event.origin !== "https://trello.com") {
+            return;
+          }
           if (event.data.trelloUrlChanged == null) {
             return;
           }
@@ -169,7 +172,7 @@
   })();
 
   chrome.runtime.sendMessage({
-    type: "getHost"
+    type: "harvest:browser:getHost"
   }, function(host) {
     return new TrelloProfile(host);
   });

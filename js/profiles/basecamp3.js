@@ -317,7 +317,7 @@
   })();
 
   chrome.runtime.sendMessage({
-    type: "getHost"
+    type: "harvest:browser:getHost"
   }, function(host) {
     return new Basecamp3Profile(host);
   });

@@ -1,8 +1,8 @@
 {
   "update_url": "https://clients2.google.com/service/update2/crx",
   "name": "required Time Tracker",
-  "version": "2.6.2",
   "description": "Track time from Chrome and within popular project management tools.",
+  "version": "3.0.0",
   "manifest_version": 2,
   "icons": {
     "16": "images/h-app@16px.png",
@@ -26,43 +26,30 @@
   },
   "background": {
     "scripts": [
-      "js/background/config.js",
-      "js/background/cookie.js",
+      "js/config.js",
       "js/background.js"
-    ]
+    ],
+    "persistent": true
   },
   "content_security_policy": "script-src 'self' https://*.harvestapp.com https://*.harvestapp.localhost; object-src 'self'",
   "permissions": [
-    "*://github.com/*",
     "*://basecamp.com/*",
     "https://secure.helpscout.net/mailbox/*",
     "https://*.harvestapp.com/*",
-    "cookies",
+    "https://github.com/*",
     "webRequest",
     "webRequestBlocking"
   ],
   "content_scripts": [
     {
-      "matches": [
-        "https://*.harvestapp.com/time*",
-        "http://*.harvestapp.com/time*",
-        "http://*.harvestapp.localhost/time*"
-      ],
-      "js": [
-        "js/forwarding.js"
-      ]
-    },
-    {
       "matches": [ "https://basecamp.com/*" ],
       "js": [
-        "js/forwarding.js",
         "js/profiles/basecamp2.js"
       ]
     },
     {
       "matches": [ "https://3.basecamp.com/*" ],
       "js": [
-        "js/forwarding.js",
         "js/profiles/basecamp3.js"
       ],
       "css": [ "css/basecamp3.css" ]
@@ -70,7 +57,6 @@
     {
       "matches": [ "https://trello.com/*" ],
       "js": [
-        "js/forwarding.js",
         "js/profiles/trello.js"
       ],
       "css": [ "css/trello.css" ]
@@ -78,7 +64,6 @@
     {
       "matches": [ "https://github.com/*" ],
       "js": [
-        "js/forwarding.js",
         "js/profiles/github.js"
       ],
       "css": [ "css/github.css" ]
@@ -86,12 +71,9 @@
     {
       "matches": [ "https://secure.helpscout.net/*" ],
       "js": [
-        "js/forwarding.js",
         "js/profiles/helpscout.js"
       ],
       "css": [ "css/helpscout.css" ]
     }
-  ],
-  "web_accessible_resources": [
   ]
 }

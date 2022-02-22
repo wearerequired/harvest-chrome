@@ -1,5 +1,5 @@
 (function() {
-  var canBeClosed, getService, setRunningTimerIcon, shouldClose, waitUntilChromeAutofocuses;
+  var canBeClosed, getService, shouldClose, waitUntilChromeAutofocuses;
 
   canBeClosed = true;
 
@@ -19,10 +19,13 @@
     };
   })(this));
 
-  window.addEventListener("message", function(e) {
-    var iframe, isRunning, matches, message, ref;
+  window.addEventListener("message", function(evt) {
+    var iframe, message;
+    if (evt.origin !== this.host) {
+      return;
+    }
     iframe = document.querySelector("iframe");
-    message = e.data;
+    message = evt.data;
     if (message.type === "frame:close") {
       if (canBeClosed) {
         return window.close();
@@ -31,31 +34,16 @@
       }
     } else if (message.type === "frame:resize") {
       return iframe.style.height = message.value + "px";
-    } else if (matches = (ref = message.type) != null ? ref.match(/timer:(started|stopped)/) : void 0) {
-      isRunning = matches[1] === "started";
-      return setRunningTimerIcon(isRunning);
+    } else if (message.type === "timer:started") {
+      return chrome.runtime.sendMessage({
+        type: "harvest:browser:timer:started"
+      });
+    } else if (message.type === "timer:stopped") {
+      return chrome.runtime.sendMessage({
+        type: "harvest:browser:timer:stopped"
+      });
     }
   });
-
-  setRunningTimerIcon = function(isRunning) {
-    var options, state;
-    state = isRunning ? "on" : "off";
-    canBeClosed = false;
-    options = {
-      path: {
-        "19": "images/h-toolbar-" + state + "@19px.png",
-        "38": "images/h-toolbar-" + state + "@38px.png"
-      }
-    };
-    chrome.browserAction.setIcon(options, function() {
-      if (shouldClose) {
-        return window.close();
-      }
-    });
-    return chrome.browserAction.setTitle({
-      title: isRunning ? "View the running Harvest timer" : "Start a Harvest timer"
-    });
-  };
 
   waitUntilChromeAutofocuses = function(element) {
     return element.getBoundingClientRect().width;
