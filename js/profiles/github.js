@@ -32,7 +32,6 @@
       document.body.addEventListener("harvest-event:ready", this.addTimerIfOnIssue);
       this.headerButton = this.createButton();
       this.headerButton.classList.add('btn-sm');
-      this.headerButton.classList.add('mr-1');
       this.commentButton = this.createButton();
       return new MutationObserver(this.handleMutations).observe(document.body, {
         childList: true,
@@ -125,7 +124,7 @@
       }
       if (formActions = document.querySelector('#partial-new-comment-form-actions')) {
         wrapper = document.createElement("div");
-        wrapper.classList.add('bg-gray-light', 'mr-1');
+        wrapper.classList.add('bg-gray-light');
         wrapper.appendChild(this.commentButton);
         formActions.children[0].prepend(wrapper);
       }

@@ -1,4 +1,8 @@
-.harvest-timer {
+.pull.request .harvest-timer {
+  margin-right: 4px;
+}
+
+.issue .harvest-timer {
   margin-right: 8px;
 }
 
