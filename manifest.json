@@ -2,7 +2,8 @@
   "update_url": "https://clients2.google.com/service/update2/crx",
   "name": "required Time Tracker",
   "description": "Track time from Chrome and within popular project management tools.",
-  "version": "3.0.0",
+  "version": "3.0.1",
+  "author": "required gmbh",
   "manifest_version": 2,
   "icons": {
     "16": "images/h-app@16px.png",
