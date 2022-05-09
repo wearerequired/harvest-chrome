@@ -124,7 +124,7 @@
       }
       if (formActions = document.querySelector('#partial-new-comment-form-actions')) {
         wrapper = document.createElement("div");
-        wrapper.classList.add('bg-gray-light');
+        wrapper.classList.add('bg-gray-light', 'mr-1');
         wrapper.appendChild(this.commentButton);
         formActions.children[0].prepend(wrapper);
       }
