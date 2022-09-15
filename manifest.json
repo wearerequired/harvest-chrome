@@ -1,16 +1,17 @@
 {
+  "$schema": "https://json.schemastore.org/chrome-manifest.json",
   "update_url": "https://clients2.google.com/service/update2/crx",
   "name": "required Time Tracker",
+  "version": "2.6.2",
   "description": "Track time from Chrome and within popular project management tools.",
-  "version": "3.0.1",
   "author": "required gmbh",
-  "manifest_version": 2,
+  "manifest_version": 3,
   "icons": {
     "16": "images/h-app@16px.png",
     "48": "images/h-app@48px.png",
     "128": "images/h-app@128px.png"
   },
-  "browser_action": {
+  "action": {
     "default_icon": {
       "19": "images/h-toolbar-off@19px.png",
       "38": "images/h-toolbar-off@38px.png"
@@ -19,38 +20,55 @@
     "default_popup": "popup.html"
   },
   "commands": {
-    "_execute_browser_action": {
+    "_execute_action": {
       "suggested_key": {
         "default": "Alt+Shift+H"
       }
     }
   },
   "background": {
-    "scripts": [
-      "js/config.js",
+    "service_worker": [
+      "js/background/config.js",
+      "js/background/cookie.js",
       "js/background.js"
-    ],
-    "persistent": true
+    ]
   },
-  "content_security_policy": "script-src 'self' https://*.harvestapp.com https://*.harvestapp.localhost; object-src 'self'",
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' https://*.harvestapp.com https://*.harvestapp.localhost; object-src 'self'"
+  },
   "permissions": [
-    "*://basecamp.com/*",
-    "https://secure.helpscout.net/mailbox/*",
-    "https://*.harvestapp.com/*",
-    "https://github.com/*",
+    "cookies",
     "webRequest",
     "webRequestBlocking"
   ],
+  "host_permissions": [
+    "*://github.com/*",
+    "*://basecamp.com/*",
+    "https://secure.helpscout.net/mailbox/*",
+    "https://*.harvestapp.com/*"
+  ],
   "content_scripts": [
+    {
+      "matches": [
+        "https://*.harvestapp.com/time*",
+        "http://*.harvestapp.com/time*",
+        "http://*.harvestapp.localhost/time*"
+      ],
+      "js": [
+        "js/forwarding.js"
+      ]
+    },
     {
       "matches": [ "https://basecamp.com/*" ],
       "js": [
+        "js/forwarding.js",
         "js/profiles/basecamp2.js"
       ]
     },
     {
       "matches": [ "https://3.basecamp.com/*" ],
       "js": [
+        "js/forwarding.js",
         "js/profiles/basecamp3.js"
       ],
       "css": [ "css/basecamp3.css" ]
@@ -58,6 +76,7 @@
     {
       "matches": [ "https://trello.com/*" ],
       "js": [
+        "js/forwarding.js",
         "js/profiles/trello.js"
       ],
       "css": [ "css/trello.css" ]
@@ -65,6 +84,7 @@
     {
       "matches": [ "https://github.com/*" ],
       "js": [
+        "js/forwarding.js",
         "js/profiles/github.js"
       ],
       "css": [ "css/github.css" ]
@@ -72,6 +92,7 @@
     {
       "matches": [ "https://secure.helpscout.net/*" ],
       "js": [
+        "js/forwarding.js",
         "js/profiles/helpscout.js"
       ],
       "css": [ "css/helpscout.css" ]
