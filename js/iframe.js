@@ -1,5 +1,5 @@
 (function() {
-  var canBeClosed, getService, shouldClose, waitUntilChromeAutofocuses;
+  var canBeClosed, shouldClose, waitUntilChromeAutofocuses;
 
   canBeClosed = true;
 
@@ -11,7 +11,7 @@
       iframe = document.querySelector("iframe");
       waitUntilChromeAutofocuses(iframe);
       return setTimeout(function() {
-        iframe.src = (_this.host + "/platform/timer?service=") + getService();
+        iframe.src = _this.host + "/platform/timer?service=chrome.google.com";
         return iframe.addEventListener("load", function() {
           return iframe.classList.add("is-loaded");
         });
@@ -34,29 +34,13 @@
       }
     } else if (message.type === "frame:resize") {
       return iframe.style.height = message.value + "px";
-    } else if (message.type === "timer:started") {
-      return chrome.runtime.sendMessage({
-        type: "harvest:browser:timer:started"
-      });
-    } else if (message.type === "timer:stopped") {
-      return chrome.runtime.sendMessage({
-        type: "harvest:browser:timer:stopped"
-      });
+    } else if (message.type === "auth:credentials") {
+      return chrome.runtime.sendMessage(evt.data);
     }
   });
 
   waitUntilChromeAutofocuses = function(element) {
     return element.getBoundingClientRect().width;
-  };
-
-  getService = function() {
-    if (navigator.userAgent.includes('Edg/')) {
-      return "microsoft.com/edge";
-    } else if (navigator.userAgent.includes('Firefox/')) {
-      return "mozilla.org/firefox";
-    } else {
-      return "chrome.google.com";
-    }
   };
 
 }).call(this);

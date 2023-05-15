@@ -14,8 +14,7 @@
   };
 
   Basecamp2Profile = (function() {
-    function Basecamp2Profile(host1) {
-      this.host = host1;
+    function Basecamp2Profile() {
       this.addTimer = bind(this.addTimer, this);
       this.addTimers = bind(this.addTimers, this);
       this.groupNameSelector = "h1";
@@ -34,9 +33,7 @@
 
     Basecamp2Profile.prototype.loadHarvestPlatform = function() {
       injectScript({
-        src: this.host + "/assets/platform.js",
-        "data-platform-config": JSON.stringify(this.platformConfig()),
-        async: true
+        "data-platform-config": JSON.stringify(this.platformConfig())
       });
       return document.body.addEventListener("harvest-event:ready", (function(_this) {
         return function() {
@@ -75,15 +72,15 @@
     Basecamp2Profile.prototype.getDataForTimer = function(item) {
       var groupName, itemName, link, linkParts;
       if ( item.querySelector("a") ) {
-          itemName = (item.querySelector("a[title]") || item.querySelector("a")).innerText;
-          groupName = document.querySelector(this.groupNameSelector).innerText;
-          link = item.querySelector("a").getAttribute("href") || "";
-          linkParts = link.match(/^\/(\d+)\/projects\/(\d+)(?:\S+)?\/todos\/(\d+)/);
+        itemName = (item.querySelector("a[title]") || item.querySelector("a")).innerText;
+        groupName = document.querySelector(this.groupNameSelector).innerText;
+        link = item.querySelector("a").getAttribute("href") || "";
+        linkParts = link.match(/^\/(\d+)\/projects\/(\d+)(?:\S+)?\/todos\/(\d+)/);
       } else {
-          itemName = item.innerText;
-          groupName = document.querySelector(this.groupNameSelector).innerText;
-          link = window.location.pathname;
-          linkParts = link.match(/^\/(\d+)\/projects\/(\d+)(?:\S+)?\/messages\/(\d+)/);
+        itemName = item.innerText;
+        groupName = document.querySelector(this.groupNameSelector).innerText;
+        link = window.location.pathname;
+        linkParts = link.match(/^\/(\d+)\/projects\/(\d+)(?:\S+)?\/messages\/(\d+)/);
       }
 
       return {
@@ -126,9 +123,10 @@
       timer.setAttribute("data-permalink", "https://basecamp.com/" + data.account.id + "/projects/" + data.group.id + "/todos/" + data.item.id);
 
       if ( ! item.querySelector("a") ) {
-          timer.style.marginLeft = "4px";
-          timer.setAttribute("data-permalink", "https://basecamp.com/" + data.account.id + "/projects/" + data.group.id + "/messages/" + data.item.id);
+        timer.style.marginLeft = "4px";
+        timer.setAttribute("data-permalink", "https://basecamp.com/" + data.account.id + "/projects/" + data.group.id + "/messages/" + data.item.id);
       }
+
       return item.insertBefore(timer, item.children[0]);
     };
 
@@ -142,10 +140,6 @@
 
   })();
 
-  chrome.runtime.sendMessage({
-    type: "harvest:browser:getHost"
-  }, function(host) {
-    return new Basecamp2Profile(host);
-  });
+  new Basecamp2Profile();
 
 }).call(this);

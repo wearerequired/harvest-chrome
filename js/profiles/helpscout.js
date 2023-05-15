@@ -5,23 +5,16 @@
   injectScript = function(opts) {
     var name, ph, script, value;
     script = document.createElement("script");
-    switch (typeof opts) {
-      case "object":
-        for (name in opts) {
-          value = opts[name];
-          script[name] = value;
-        }
-        break;
-      case "string":
-        script.innerHTML = opts;
+    for (name in opts) {
+      value = opts[name];
+      script.setAttribute(name, value);
     }
     ph = document.getElementsByTagName("script")[0];
     return ph.parentNode.insertBefore(script, ph);
   };
 
   HelpscoutProfile = (function() {
-    function HelpscoutProfile(host1) {
-      this.host = host1;
+    function HelpscoutProfile() {
       this.addTimerIfOnIssue = bind(this.addTimerIfOnIssue, this);
       this.handleMutations = bind(this.handleMutations, this);
       this.listen();
@@ -67,10 +60,8 @@
     };
 
     HelpscoutProfile.prototype.infect = function() {
-      injectScript("window._harvestPlatformConfig = " + (JSON.stringify(this.platformConfig())) + ";");
       injectScript({
-        src: this.host + "/assets/platform.js",
-        async: true
+        "data-platform-config": JSON.stringify(this.platformConfig())
       });
       return document.addEventListener('pjax:end', this.addTimerIfOnIssue);
     };
@@ -139,10 +130,6 @@
 
   })();
 
-  chrome.runtime.sendMessage({
-    type: "harvest:browser:getHost"
-  }, function(host) {
-    return new HelpscoutProfile(host);
-  });
+  new HelpscoutProfile();
 
 }).call(this);
