@@ -18,7 +18,7 @@
       this.addTimer = bind(this.addTimer, this);
       this.addTimers = bind(this.addTimers, this);
       this.groupNameSelector = "h1";
-      this.itemSelector = ".todo .content";
+      this.itemSelector = ".todo .content, .message h3";
       this.platformLoaded = false;
       this.interval = 250;
       this.loadHarvestPlatform();
@@ -71,10 +71,18 @@
 
     Basecamp2Profile.prototype.getDataForTimer = function(item) {
       var groupName, itemName, link, linkParts;
-      itemName = (item.querySelector("a[title]") || item.querySelector("a")).innerText;
-      groupName = document.querySelector(this.groupNameSelector).innerText;
-      link = item.querySelector("a").getAttribute("href") || "";
-      linkParts = link.match(/^\/(\d+)\/projects\/(\d+)(?:\S+)?\/todos\/(\d+)/);
+      if ( item.querySelector("a") ) {
+        itemName = (item.querySelector("a[title]") || item.querySelector("a")).innerText;
+        groupName = document.querySelector(this.groupNameSelector).innerText;
+        link = item.querySelector("a").getAttribute("href") || "";
+        linkParts = link.match(/^\/(\d+)\/projects\/(\d+)(?:\S+)?\/todos\/(\d+)/);
+      } else {
+        itemName = item.innerText;
+        groupName = document.querySelector(this.groupNameSelector).innerText;
+        link = window.location.pathname;
+        linkParts = link.match(/^\/(\d+)\/projects\/(\d+)(?:\S+)?\/messages\/(\d+)/);
+      }
+
       return {
         account: {
           id: linkParts[1]
@@ -113,6 +121,12 @@
       timer.setAttribute("data-group", JSON.stringify(data.group));
       timer.setAttribute("data-item", JSON.stringify(data.item));
       timer.setAttribute("data-permalink", "https://basecamp.com/" + data.account.id + "/projects/" + data.group.id + "/todos/" + data.item.id);
+
+      if ( ! item.querySelector("a") ) {
+        timer.style.marginLeft = "4px";
+        timer.setAttribute("data-permalink", "https://basecamp.com/" + data.account.id + "/projects/" + data.group.id + "/messages/" + data.item.id);
+      }
+
       return item.insertBefore(timer, item.children[0]);
     };
 
