@@ -30,8 +30,7 @@
   };
 
   TrelloProfile = (function() {
-    function TrelloProfile(host1) {
-      this.host = host1;
+    function TrelloProfile() {
       this.hydrateTimer = bind(this.hydrateTimer, this);
       this.addTimer = bind(this.addTimer, this);
       this.addTimerIfOnCard = bind(this.addTimerIfOnCard, this);
@@ -48,47 +47,25 @@
           return _this.addTimerIfOnCard();
         };
       })(this));
-      return window.addEventListener("message", (function(_this) {
-        return function(event) {
-          if (event.origin !== "https://trello.com") {
-            return;
+      return chrome.runtime.onMessage.addListener((function(_this) {
+        return function(request) {
+          if (request.trelloUrlChanged != null) {
+            return _this.addTimerIfOnCard();
           }
-          if (event.data.trelloUrlChanged == null) {
-            return;
-          }
-          return _this.addTimerIfOnCard();
         };
       })(this));
     };
 
     TrelloProfile.prototype.infect = function() {
-      injectScript({
-        src: this.host + "/assets/platform.js",
-        "data-platform-config": JSON.stringify(this.platformConfig()),
-        async: true
+      return injectScript({
+        "data-platform-config": JSON.stringify(this.platformConfig())
       });
-      return injectScript("(" + this.trelloUrlMonitor + ")();");
     };
 
     TrelloProfile.prototype.platformConfig = function() {
       return {
         applicationName: "Trello"
       };
-    };
-
-    TrelloProfile.prototype.trelloUrlMonitor = function() {
-      var change, fn;
-      change = function() {
-        return window.postMessage({
-          trelloUrlChanged: true
-        }, "*");
-      };
-      fn = window.history.pushState;
-      window.history.pushState = function() {
-        fn.apply(window.history, arguments);
-        return change();
-      };
-      return window.addEventListener("popstate", change);
     };
 
     TrelloProfile.prototype.addTimerIfOnCard = function() {
@@ -171,10 +148,6 @@
 
   })();
 
-  chrome.runtime.sendMessage({
-    type: "harvest:browser:getHost"
-  }, function(host) {
-    return new TrelloProfile(host);
-  });
+  new TrelloProfile();
 
 }).call(this);

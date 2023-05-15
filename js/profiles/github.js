@@ -14,8 +14,7 @@
   };
 
   GithubProfile = (function() {
-    function GithubProfile(host1) {
-      this.host = host1;
+    function GithubProfile() {
       this.addTimerIfOnIssue = bind(this.addTimerIfOnIssue, this);
       this.handleMutations = bind(this.handleMutations, this);
       this.listen();
@@ -32,6 +31,7 @@
       document.body.addEventListener("harvest-event:ready", this.addTimerIfOnIssue);
       this.headerButton = this.createButton();
       this.headerButton.classList.add('btn-sm');
+      this.headerButton.classList.add('mr-1');
       this.commentButton = this.createButton();
       return new MutationObserver(this.handleMutations).observe(document.body, {
         childList: true,
@@ -67,9 +67,7 @@
 
     GithubProfile.prototype.infect = function() {
       injectScript({
-        src: this.host + "/assets/platform.js",
-        "data-platform-config": JSON.stringify(this.platformConfig()),
-        async: true
+        "data-platform-config": JSON.stringify(this.platformConfig())
       });
       return document.addEventListener('pjax:end', this.addTimerIfOnIssue);
     };
@@ -151,10 +149,6 @@
 
   })();
 
-  chrome.runtime.sendMessage({
-    type: "harvest:browser:getHost"
-  }, function(host) {
-    return new GithubProfile(host);
-  });
+  new GithubProfile();
 
 }).call(this);

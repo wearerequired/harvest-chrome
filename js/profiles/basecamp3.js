@@ -14,8 +14,7 @@
   };
 
   Basecamp3Profile = (function() {
-    function Basecamp3Profile(host1) {
-      this.host = host1;
+    function Basecamp3Profile() {
       this.addFullPageToDoTimer = bind(this.addFullPageToDoTimer, this);
       this.addToDoItemTimer = bind(this.addToDoItemTimer, this);
       this.addToDoListTimer = bind(this.addToDoListTimer, this);
@@ -36,9 +35,7 @@
 
     Basecamp3Profile.prototype.loadHarvestPlatform = function() {
       injectScript({
-        src: this.host + "/assets/platform.js",
-        "data-platform-config": JSON.stringify(this.platformConfig()),
-        async: true
+        "data-platform-config": JSON.stringify(this.platformConfig())
       });
       return document.body.addEventListener("harvest-event:ready", this.platformLoaded);
     };
@@ -316,10 +313,6 @@
 
   })();
 
-  chrome.runtime.sendMessage({
-    type: "harvest:browser:getHost"
-  }, function(host) {
-    return new Basecamp3Profile(host);
-  });
+  new Basecamp3Profile();
 
 }).call(this);
