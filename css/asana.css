@@ -1,0 +1,21 @@
+@keyframes harvestClockRotateThreeSixty {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.harvest-timer.running {
+  background-color: #DBE0FD !important;
+  fill: #3F6AC4 !important;
+}
+  .harvest-timer.running .asana-minute-hand {
+    animation: harvestClockRotateThreeSixty 3s infinite linear;
+    transform-origin: 50% 56.25%;
+  }
+  .harvest-timer.running .asana-hour-hand {
+    animation: harvestClockRotateThreeSixty 15s infinite linear;
+    transform-origin: 50% 56.25%;
+  }
