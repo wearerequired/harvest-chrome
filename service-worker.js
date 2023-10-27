@@ -14,17 +14,12 @@ chrome.runtime.onMessage.addListener(async (message, sender, respond) => {
 })
 
 chrome.runtime.onInstalled.addListener(({ reason, previousVersion }) => {
-  const { version } = chrome.runtime.getManifest()
-  const typeformUrl = `https://harvest.typeform.com/to/ECkKrUFP#version=${version}&browser=chrome`
-
   if (reason === chrome.runtime.OnInstalledReason.INSTALL) {
     const splashUrl = 'https://www.getharvest.com/harvest-for-chrome-installed'
-    chrome.tabs.create({ url: `${splashUrl}?version=${version}` })
-    chrome.runtime.setUninstallURL(typeformUrl)
+    chrome.tabs.create({ url: `${splashUrl}?version=${chrome.runtime.getManifest().version}` })
   }
 
   if (reason === chrome.runtime.OnInstalledReason.UPDATE) {
-    chrome.runtime.setUninstallURL(typeformUrl)
     chrome.notifications.create({
       iconUrl: 'images/h-app@128px.png',
       message: 'Please reopen the extension to continue to receive updates.',
