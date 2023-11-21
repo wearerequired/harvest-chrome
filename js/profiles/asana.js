@@ -73,7 +73,7 @@
     const copyLinkButton = toolbar.querySelector(Selectors.CopyLinkButton)
     const timerButton = buildTimerButtonForTask(taskPane)
 
-    toolbar.insertBefore(timerButton, copyLinkButton.nextSibling)
+    copyLinkButton.parentNode.insertBefore(timerButton, copyLinkButton.nextSibling)
 
     notifyPlatformOfNewTimer(timerButton)
   }

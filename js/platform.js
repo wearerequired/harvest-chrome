@@ -6,7 +6,7 @@ var SNOWPACK_PUBLIC_SCHEME = "https";
 var scheme = SNOWPACK_PUBLIC_SCHEME || "https";
 var baseUrl = `${scheme}://${SNOWPACK_PUBLIC_HARVESTAPP_PLATFORM_HOST}`;
 (function() {
-  let HarvestPlatform, LightBox, config, createPermalink, getData, getValue, lightbox, listenForEvent, param, setTimer, stopTimer, worker, xdm;
+  let HarvestPlatform, LightBox, config, createPermalink, getData, getValue, lastRunningTimerData, lightbox, listenForEvent, param, setTimer, stopTimer, worker, xdm;
   LightBox = class LightBox {
     constructor() {
       this.el = document.createElement("div");
@@ -36,10 +36,13 @@ var baseUrl = `${scheme}://${SNOWPACK_PUBLIC_HARVESTAPP_PLATFORM_HOST}`;
     }
   };
   lightbox = new LightBox();
-  worker = document.createElement("iframe");
-  worker.hidden = true;
-  worker.src = `${baseUrl}/platform/worker`;
-  document.body.appendChild(worker);
+  if (!document.getElementById("harvest-worker")) {
+    worker = document.createElement("iframe");
+    worker.hidden = true;
+    worker.id = "harvest-worker";
+    worker.src = `${baseUrl}/platform/worker`;
+    document.body.appendChild(worker);
+  }
   if (!(xdm = document.getElementById("harvest-messaging"))) {
     xdm = document.createElement("div");
     xdm.id = "harvest-messaging";
@@ -97,6 +100,7 @@ var baseUrl = `${scheme}://${SNOWPACK_PUBLIC_HARVESTAPP_PLATFORM_HOST}`;
   };
   setTimer = function(data) {
     let child, el, group, i, item, len, ref, ref1, ref2, results;
+    lastRunningTimerData = data;
     ref = document.querySelectorAll(".harvest-timer");
     results = [];
     for (i = 0, len = ref.length; i < len; i++) {
@@ -232,6 +236,7 @@ var baseUrl = `${scheme}://${SNOWPACK_PUBLIC_HARVESTAPP_PLATFORM_HOST}`;
         e.stopPropagation();
         return this.openIframe(getData(element));
       });
+      setTimer(lastRunningTimerData);
       return element.setAttribute("data-listening", true);
     }
     openIframe(data) {
@@ -358,4 +363,4 @@ supported by your browser.`) : void 0;
     });
   }
 })();
-//# sourceMappingURL=../js/platform.Vsq3PaY1IYPL.js.map
+//# sourceMappingURL=../js/platform.M9nbId7tiX97.js.map
