@@ -48,7 +48,7 @@
           results1 = [];
           for (j = 0, len1 = addedNodes.length; j < len1; j++) {
             node = addedNodes[j];
-            if (node.nodeType === Node.ELEMENT_NODE && (node.classList.contains('c-convo-toolbar') || node.querySelector('[class*="Actionscss__ActionsUI"]'))) {
+            if (node.nodeType === Node.ELEMENT_NODE && node.querySelector('.c-convo-toolbar, [class*="Actionscss__ActionsUI"]')) {
               results1.push(this.addTimerIfOnIssue());
             } else {
               results1.push(void 0);
@@ -131,7 +131,6 @@
       button = document.createElement("a");
       button.className = "harvest-timer harvest-timer--helpscout-new-inbox";
       button.setAttribute("data-skip-styling", true);
-      button.style
       icon = document.createElement("i");
       icon.className = "icon-clock-sm";
       button.appendChild(icon);
