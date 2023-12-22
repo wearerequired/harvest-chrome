@@ -4,6 +4,22 @@
     animation: rotate 4s linear infinite;
 }
 
+.harvest-timer--helpscout-new-inbox {
+	position: relative;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 36px;
+	padding: 3px;
+	border-radius: 50%;
+	color: rgb(49, 67, 81);
+
+	&:hover {
+		text-decoration: none;
+		background: #f1f3f5;
+	}
+}
+
 @keyframes rotate {
     100% {
         transform: rotate(360deg);
