@@ -1,6 +1,6 @@
 {
   "update_url": "https://clients2.google.com/service/update2/crx",
-  "version": "4.1.1",
+  "version": "4.1.1.1",
   "name": "required Time Tracker",
   "description": "Track time from Chrome and within popular project management tools.",
   "author": "required gmbh",

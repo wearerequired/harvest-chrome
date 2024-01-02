@@ -1,11 +1,31 @@
 .harvest-timer.running .icon-clock-sm {
-    color: #3197d6;
-    display: inline-block;
-    animation: rotate 4s linear infinite;
+	color: #07c;
+	display: inline-block;
+	animation: required-timer-rotate 4s linear infinite;
 }
 
-@keyframes rotate {
-    100% {
-        transform: rotate(360deg);
-    }
+.harvest-timer--helpscout-new-inbox {
+	position: relative;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 36px;
+	padding: 3px;
+	border-radius: 50%;
+	color: var(--hsds-color-charcoal-900);
+
+	&:hover {
+		text-decoration: none;
+		background: var(--hsds-button-color-grey-outline-hoverIconOnly);
+	}
+
+	&.running .icon-clock-sm {
+		color: var(--hsds-color-blue-600);
+	}
+}
+
+@keyframes required-timer-rotate {
+	100% {
+		transform: rotate(360deg);
+	}
 }
