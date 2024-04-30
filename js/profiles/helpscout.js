@@ -1,4 +1,6 @@
 (function() {
+  const icon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 98.4 100"><path d="M88.4 0H10A10 10 0 0 0 0 10v80a10 10 0 0 0 10 10h78.4a10 10 0 0 0 10-10V10a10 10 0 0 0-10-10M25.9 77.5a4 4 0 0 1-3.8 4h-3.9V22.3c0-2.2 1.8-3.9 3.9-3.9h3.8zm11.7-15.8a4 4 0 0 1-3.9 4.1v15.8h-3.8V22.3c0-2.2 1.7-3.9 3.8-3.9h3.9zM57 53.9a4 4 0 0 1-3.8 4h-7.8v23.6h-3.9V46c0-2.2 1.8-3.9 3.9-3.9H57zm11.6 23.6c0 2.2-1.8 4-3.8 4h-3.9V38.1c0-2.2 1.8-3.9 3.9-3.9V18.4h3.8zm11.7 0a4 4 0 0 1-3.9 4h-3.8V22.3c0-2.2 1.7-3.9 3.8-3.9h3.9z" fill-rule="evenodd"/></svg>';
+
   var HelpscoutProfile, injectScript,
     bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
@@ -114,26 +116,20 @@
     };
 
     HelpscoutProfile.prototype.createButtonOld = function() {
-      var button, link, icon;
-      button = document.createElement("li");
-      button.className = "harvest-timer";
+      const button = document.createElement("li");
+      button.className = "harvest-timer harvest-timer--helpscout-legacy-inbox";
       button.setAttribute("data-skip-styling", true);
-      link = document.createElement("a");
-      icon = document.createElement("i");
-      icon.className = "icon-clock-sm";
-      link.appendChild(icon);
+      const link = document.createElement("button");
+	  link.innerHTML = icon;
       button.appendChild(link);
       return button;
     };
 
     HelpscoutProfile.prototype.createButtonNew = function() {
-      var button, icon;
-      button = document.createElement("a");
+      const button = document.createElement("button");
       button.className = "harvest-timer harvest-timer--helpscout-new-inbox";
       button.setAttribute("data-skip-styling", true);
-      icon = document.createElement("i");
-      icon.className = "icon-clock-sm";
-      button.appendChild(icon);
+      button.innerHTML = icon;
       return button;
     };
 
