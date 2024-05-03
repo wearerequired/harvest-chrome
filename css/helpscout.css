@@ -23,6 +23,6 @@
 	}
 
 	&.harvest-timer--helpscout-new-inbox {
-		padding-right: 8px;
+		padding-inline: 8px;
 	}
 }
