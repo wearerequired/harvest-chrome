@@ -94,8 +94,10 @@
     };
 
     GithubProfile.prototype.issueTitle = function() {
+	// TODO: Hotfix for new GitHub issue Octobre 2024, update from upstream once available.
       var ref;
-      return (ref = document.querySelector('.js-issue-title')) != null ? ref.innerText : void 0;
+	  ref = document.querySelector('.js-issue-title') ?? document.querySelector('[data-testid="issue-title"]');
+      return ref.innerText ?? null;
     };
 
     GithubProfile.prototype.addTimer = function(data) {
@@ -116,10 +118,19 @@
           el.remove();
         }
       }
+
+	  // TODO: Hotfix for new GitHub issue Octobre 2024, update from upstream once available.
       actions = document.querySelector("div.gh-header-actions");
       if (actions != null) {
         actions.insertBefore(this.headerButton, actions.children[0]);
-      }
+      } else {
+		actions = document.querySelectorAll('div:has(> [data-testid="edit-issue-title-button"])');
+		actions.forEach((action) => {
+			const clonedButton = this.headerButton.cloneNode(true);
+			action.insertBefore(clonedButton, action.children[0]);
+		})
+	  }
+
       if (formActions = document.querySelector('#partial-new-comment-form-actions')) {
         wrapper = document.createElement("div");
         wrapper.classList.add('bg-gray-light', 'mr-1');
