@@ -7,15 +7,34 @@
   }
 }
 
-.harvest-timer.running {
-  background-color: #DBE0FD !important;
-  fill: #3F6AC4 !important;
+.harvest-timer {
+  border-radius: 5px;
+  padding: 7px 5px 4px 5px;
 }
-  .harvest-timer.running .asana-minute-hand {
-    animation: harvestClockRotateThreeSixty 3s infinite linear;
-    transform-origin: 50% 56.25%;
-  }
-  .harvest-timer.running .asana-hour-hand {
-    animation: harvestClockRotateThreeSixty 15s infinite linear;
-    transform-origin: 50% 56.25%;
-  }
+
+.harvest-timer.running {
+  background-color: #dbe0fd !important;
+  fill: #3f6ac4 !important;
+}
+
+.harvest-timer.running .asana-minute-hand {
+  animation: harvestClockRotateThreeSixty 3s infinite linear;
+  transform-origin: 50% 56.25%;
+}
+
+.harvest-timer.running .asana-hour-hand {
+  animation: harvestClockRotateThreeSixty 15s infinite linear;
+  transform-origin: 50% 56.25%;
+}
+
+.header-logo {
+  margin-right: 5px;
+}
+
+.logo {
+  margin-right: 5px;
+}
+
+.harvest-item-total-hours {
+  margin-right: 5px;
+}

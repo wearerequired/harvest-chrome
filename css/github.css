@@ -8,3 +8,7 @@
   background: linear-gradient(to bottom, #2ba0fb, #106fbf);
   border-color: #054982;
 }
+
+[data-component='PH_Actions'] .harvest-timer {
+  font-size: 14px;
+}

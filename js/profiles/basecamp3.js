@@ -1,318 +1,382 @@
-(function() {
-  var Basecamp3Profile, injectScript,
-    bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+;(function () {
+  var Basecamp3Profile,
+    injectScript,
+    bind = function (fn, me) {
+      return function () {
+        return fn.apply(me, arguments)
+      }
+    }
 
-  injectScript = function(opts) {
-    var name, ph, script, value;
-    script = document.createElement("script");
+  injectScript = function (opts) {
+    var name, ph, script, value
+    script = document.createElement('script')
     for (name in opts) {
-      value = opts[name];
-      script.setAttribute(name, value);
+      value = opts[name]
+      script.setAttribute(name, value)
     }
-    ph = document.getElementsByTagName("script")[0];
-    return ph.parentNode.insertBefore(script, ph);
-  };
+    ph = document.getElementsByTagName('script')[0]
+    return ph.parentNode.insertBefore(script, ph)
+  }
 
-  Basecamp3Profile = (function() {
+  Basecamp3Profile = (function () {
     function Basecamp3Profile() {
-      this.addFullPageToDoTimer = bind(this.addFullPageToDoTimer, this);
-      this.addToDoItemTimer = bind(this.addToDoItemTimer, this);
-      this.addToDoListTimer = bind(this.addToDoListTimer, this);
-      this.addTimers = bind(this.addTimers, this);
-      this.addTimersSoon = bind(this.addTimersSoon, this);
-      this.removeTimers = bind(this.removeTimers, this);
-      this.platformLoaded = bind(this.platformLoaded, this);
-      this.groupNameSelector = "h1 strong a";
-      this.platformXDMElement = null;
-      this.loadHarvestPlatform();
+      this.addFullPageToDoTimer = bind(this.addFullPageToDoTimer, this)
+      this.addToDoItemTimer = bind(this.addToDoItemTimer, this)
+      this.addToDoListTimer = bind(this.addToDoListTimer, this)
+      this.addTimers = bind(this.addTimers, this)
+      this.addTimersSoon = bind(this.addTimersSoon, this)
+      this.removeTimers = bind(this.removeTimers, this)
+      this.platformLoaded = bind(this.platformLoaded, this)
+      this.groupNameSelector = 'h1 strong a'
+      this.platformXDMElement = null
+      this.loadHarvestPlatform()
     }
 
-    Basecamp3Profile.prototype.platformConfig = function() {
+    Basecamp3Profile.prototype.platformConfig = function () {
       return {
-        applicationName: "Basecamp"
-      };
-    };
+        applicationName: 'Basecamp',
+      }
+    }
 
-    Basecamp3Profile.prototype.loadHarvestPlatform = function() {
+    Basecamp3Profile.prototype.loadHarvestPlatform = function () {
       injectScript({
-        "data-platform-config": JSON.stringify(this.platformConfig())
-      });
-      return document.body.addEventListener("harvest-event:ready", this.platformLoaded);
-    };
+        'data-platform-config': JSON.stringify(this.platformConfig()),
+      })
+      return document.body.addEventListener(
+        'harvest-event:ready',
+        this.platformLoaded
+      )
+    }
 
-    Basecamp3Profile.prototype.platformLoaded = function() {
-      this.platformXDMElement = document.querySelector("#harvest-messaging");
-      document.addEventListener("turbolinks:before-cache", this.removeTimers);
-      new MutationObserver(this.addTimersSoon).observe(document.querySelector("html"), {
-        childList: true,
-        subtree: true
-      });
-      return this.addTimers();
-    };
+    Basecamp3Profile.prototype.platformLoaded = function () {
+      this.platformXDMElement = document.querySelector('#harvest-messaging')
+      document.addEventListener('turbolinks:before-cache', this.removeTimers)
+      new MutationObserver(this.addTimersSoon).observe(
+        document.querySelector('html'),
+        {
+          childList: true,
+          subtree: true,
+        }
+      )
+      return this.addTimers()
+    }
 
-    Basecamp3Profile.prototype.removeTimers = function() {
-      var i, len, ref, results, timer;
-      ref = document.querySelectorAll(".harvest-timer");
-      results = [];
+    Basecamp3Profile.prototype.removeTimers = function () {
+      var i, len, ref, results, timer
+      ref = document.querySelectorAll('.harvest-timer')
+      results = []
       for (i = 0, len = ref.length; i < len; i++) {
-        timer = ref[i];
-        results.push(timer.remove());
+        timer = ref[i]
+        results.push(timer.remove())
       }
-      return results;
-    };
+      return results
+    }
 
-    Basecamp3Profile.prototype.addTimersSoon = function() {
-      clearTimeout(this.timeout);
-      return this.timeout = setTimeout(this.addTimers, 0);
-    };
+    Basecamp3Profile.prototype.addTimersSoon = function () {
+      clearTimeout(this.timeout)
+      return (this.timeout = setTimeout(this.addTimers, 0))
+    }
 
-    Basecamp3Profile.prototype.addTimers = function() {
-      this.addToDoListTimers();
-      this.addToDoItemTimers();
-      this.addFullPageToDoTimers();
-      return this.addMyAssignmentTimers();
-    };
+    Basecamp3Profile.prototype.addTimers = function () {
+      this.addToDoListTimers()
+      this.addToDoItemTimers()
+      this.addFullPageToDoTimers()
+      return this.addMyAssignmentTimers()
+    }
 
-    Basecamp3Profile.prototype.addToDoListTimers = function() {
-      var i, item, items, len, results;
-      items = document.querySelectorAll(".todolist[data-url]");
-      results = [];
+    Basecamp3Profile.prototype.addToDoListTimers = function () {
+      var i, item, items, len, results
+      items = document.querySelectorAll('.todolist[data-url]')
+      results = []
       for (i = 0, len = items.length; i < len; i++) {
-        item = items[i];
-        if (!item.querySelector(".todolist__header .harvest-timer")) {
-          results.push(this.addToDoListTimer(item));
+        item = items[i]
+        if (!item.querySelector('.todolist__header .harvest-timer')) {
+          results.push(this.addToDoListTimer(item))
         }
       }
-      return results;
-    };
+      return results
+    }
 
-    Basecamp3Profile.prototype.addToDoListTimer = function(item) {
-      var data;
-      data = this.getDataForTimer(item);
+    Basecamp3Profile.prototype.addToDoListTimer = function (item) {
+      var data
+      data = this.getDataForTimer(item)
       if (this.notEnoughInfo(data)) {
-        return;
+        return
       }
-      this.buildToDoListTimer(item, data);
-      return this.notifyPlatformOfNewTimers();
-    };
+      this.buildToDoListTimer(item, data)
+      return this.notifyPlatformOfNewTimers()
+    }
 
-    Basecamp3Profile.prototype.buildToDoListTimer = function(item, data) {
-      var permalink, timer;
-      timer = document.createElement("div");
-      timer.className = "harvest-timer";
-      this.addTimerAttributes(timer, data);
-      permalink = item.querySelector('.todolist__title a');
-      return permalink.parentElement.insertBefore(timer, permalink);
-    };
+    Basecamp3Profile.prototype.buildToDoListTimer = function (item, data) {
+      var permalink, timer
+      timer = document.createElement('div')
+      timer.className = 'harvest-timer'
+      this.addTimerAttributes(timer, data)
+      permalink = item.querySelector('.todolist__title a')
+      return permalink.parentElement.insertBefore(timer, permalink)
+    }
 
-    Basecamp3Profile.prototype.addToDoItemTimers = function() {
-      var i, item, items, len, results;
-      items = document.querySelectorAll(".todolist .todo[data-url]");
-      results = [];
+    Basecamp3Profile.prototype.addToDoItemTimers = function () {
+      var i, item, items, len, results
+      items = document.querySelectorAll('.todolist .todo[data-url]')
+      results = []
       for (i = 0, len = items.length; i < len; i++) {
-        item = items[i];
-        if (!item.querySelector(".harvest-timer")) {
-          results.push(this.addToDoItemTimer(item));
+        item = items[i]
+        if (!item.querySelector('.harvest-timer')) {
+          results.push(this.addToDoItemTimer(item))
         }
       }
-      return results;
-    };
+      return results
+    }
 
-    Basecamp3Profile.prototype.addToDoItemTimer = function(item) {
-      var data;
-      data = this.getDataForTimer(item);
+    Basecamp3Profile.prototype.addToDoItemTimer = function (item) {
+      var data
+      data = this.getDataForTimer(item)
       if (this.isTodoCompleted(item) || this.notEnoughInfo(data)) {
-        return;
+        return
       }
-      this.buildToDoItemTimer(item, data);
-      return this.notifyPlatformOfNewTimers();
-    };
+      this.buildToDoItemTimer(item, data)
+      return this.notifyPlatformOfNewTimers()
+    }
 
-    Basecamp3Profile.prototype.buildToDoItemTimer = function(item, data) {
-      var content, timer;
-      timer = document.createElement("div");
-      timer.className = "harvest-timer";
-      this.addTimerAttributes(timer, data);
-      content = item.querySelector(".checkbox__content");
-      return content.insertBefore(timer, content.querySelector(":first-child"));
-    };
+    Basecamp3Profile.prototype.buildToDoItemTimer = function (item, data) {
+      var content, timer
+      timer = document.createElement('div')
+      timer.className = 'harvest-timer'
+      this.addTimerAttributes(timer, data)
+      content = item.querySelector('.checkbox__content')
+      return content.insertBefore(timer, content.querySelector(':first-child'))
+    }
 
-    Basecamp3Profile.prototype.addFullPageToDoTimers = function() {
-      var page;
-      page = document.querySelector(".panel");
-      if (page.querySelector(".recordable--todo") && !page.querySelector(".harvest-timer")) {
-        return this.addFullPageToDoTimer(page);
+    Basecamp3Profile.prototype.addFullPageToDoTimers = function () {
+      var page
+      page = document.querySelector('.panel')
+      if (
+        page.querySelector('.recordable--todo') &&
+        !page.querySelector('.harvest-timer')
+      ) {
+        return this.addFullPageToDoTimer(page)
       }
-    };
+    }
 
-    Basecamp3Profile.prototype.addFullPageToDoTimer = function(page) {
-      var data, item;
-      item = page.querySelector(".todo[data-url]");
-      data = this.getDataForTimer(item);
+    Basecamp3Profile.prototype.addFullPageToDoTimer = function (page) {
+      var data, item
+      item = page.querySelector('.todo[data-url]')
+      data = this.getDataForTimer(item)
       if (this.isTodoCompleted(item) || this.notEnoughInfo(data)) {
-        return;
+        return
       }
-      this.buildFullPageToDoTimer(page, data);
-      return this.notifyPlatformOfNewTimers();
-    };
+      this.buildFullPageToDoTimer(page, data)
+      return this.notifyPlatformOfNewTimers()
+    }
 
-    Basecamp3Profile.prototype.buildFullPageToDoTimer = function(page, data) {
-      var icon, running, stopped, timer, toolbar;
-      timer = document.createElement("button");
-      timer.type = "button";
-      timer.className = "harvest-timer btn small";
-      timer.setAttribute("data-skip-styling", true);
-      this.addTimerAttributes(timer, data);
-      icon = document.createElement("span");
-      icon.className = "harvest-timer-icon";
-      stopped = document.createElement("span");
-      stopped.className = "stopped-text";
-      stopped.innerText = "Track time";
-      running = document.createElement("span");
-      running.className = "running-text";
-      running.innerText = "Stop timer";
-      timer.appendChild(icon);
-      timer.appendChild(stopped);
-      timer.appendChild(running);
-      toolbar = page.querySelector(".perma-toolbar");
-      return toolbar.insertBefore(timer, toolbar.querySelector(".action-sheet"));
-    };
+    Basecamp3Profile.prototype.buildFullPageToDoTimer = function (page, data) {
+      var icon, running, stopped, timer, toolbar
+      timer = document.createElement('button')
+      timer.type = 'button'
+      timer.className = 'harvest-timer btn small'
+      timer.setAttribute('data-skip-styling', true)
+      this.addTimerAttributes(timer, data)
+      icon = document.createElement('span')
+      icon.className = 'harvest-timer-icon'
+      stopped = document.createElement('span')
+      stopped.className = 'stopped-text'
+      stopped.innerText = 'Track time'
+      running = document.createElement('span')
+      running.className = 'running-text'
+      running.innerText = 'Stop timer'
+      timer.appendChild(icon)
+      timer.appendChild(stopped)
+      timer.appendChild(running)
+      toolbar = page.querySelector('.perma-toolbar')
+      return toolbar.insertBefore(timer, toolbar.querySelector('.action-sheet'))
+    }
 
-    Basecamp3Profile.prototype.addMyAssignmentTimers = function() {
-      var group, groupLink, groupName, i, item, items, j, k, l, len, len1, len2, len3, ref, ref1, results;
-      ref = document.querySelectorAll("article div.push--bottom");
+    Basecamp3Profile.prototype.addMyAssignmentTimers = function () {
+      var group,
+        groupLink,
+        groupName,
+        i,
+        item,
+        items,
+        j,
+        k,
+        l,
+        len,
+        len1,
+        len2,
+        len3,
+        ref,
+        ref1,
+        results
+      ref = document.querySelectorAll('article div.push--bottom')
       for (i = 0, len = ref.length; i < len; i++) {
-        group = ref[i];
-        if (!(groupLink = group.querySelector("a"))) {
-          continue;
+        group = ref[i]
+        if (!(groupLink = group.querySelector('a'))) {
+          continue
         }
-        groupName = groupLink.innerText;
-        items = group.querySelectorAll(".todolist.todolist--assignments");
+        groupName = groupLink.innerText
+        items = group.querySelectorAll('.todolist.todolist--assignments')
         for (j = 0, len1 = items.length; j < len1; j++) {
-          item = items[j];
-          if (!item.querySelector("h4 .harvest-timer")) {
-            this.addMyAssignmentTimer(item, groupName);
+          item = items[j]
+          if (!item.querySelector('h4 .harvest-timer')) {
+            this.addMyAssignmentTimer(item, groupName)
           }
         }
-        items = group.querySelectorAll(".todolist .todo");
+        items = group.querySelectorAll('.todolist .todo')
         for (k = 0, len2 = items.length; k < len2; k++) {
-          item = items[k];
-          if (!item.querySelector(".harvest-timer")) {
-            this.addMyAssignmentTimer(item, groupName);
+          item = items[k]
+          if (!item.querySelector('.harvest-timer')) {
+            this.addMyAssignmentTimer(item, groupName)
           }
         }
       }
-      ref1 = document.querySelectorAll(".schedule--coalesced .metadata.push_quarter--ends");
-      results = [];
+      ref1 = document.querySelectorAll(
+        '.schedule--coalesced .metadata.push_quarter--ends'
+      )
+      results = []
       for (l = 0, len3 = ref1.length; l < len3; l++) {
-        group = ref1[l];
-        if (!(groupLink = group.querySelector("a:nth-child(2)"))) {
-          continue;
+        group = ref1[l]
+        if (!(groupLink = group.querySelector('a:nth-child(2)'))) {
+          continue
         }
-        groupName = groupLink.innerText;
-        items = group.nextElementSibling.querySelectorAll(".todo");
-        results.push((function() {
-          var len4, m, results1;
-          results1 = [];
-          for (m = 0, len4 = items.length; m < len4; m++) {
-            item = items[m];
-            if (!item.querySelector(".harvest-timer")) {
-              results1.push(this.addMyAssignmentTimer(item, groupName));
+        groupName = groupLink.innerText
+        items = group.nextElementSibling.querySelectorAll('.todo')
+        results.push(
+          function () {
+            var len4, m, results1
+            results1 = []
+            for (m = 0, len4 = items.length; m < len4; m++) {
+              item = items[m]
+              if (!item.querySelector('.harvest-timer')) {
+                results1.push(this.addMyAssignmentTimer(item, groupName))
+              }
             }
-          }
-          return results1;
-        }).call(this));
+            return results1
+          }.call(this)
+        )
       }
-      return results;
-    };
+      return results
+    }
 
-    Basecamp3Profile.prototype.addMyAssignmentTimer = function(item, groupName) {
-      var data;
-      data = this.getDataForMyAssignmentTimer(item, groupName);
+    Basecamp3Profile.prototype.addMyAssignmentTimer = function (
+      item,
+      groupName
+    ) {
+      var data
+      data = this.getDataForMyAssignmentTimer(item, groupName)
       if (this.notEnoughInfo(data)) {
-        return;
+        return
       }
-      this.buildMyAssignmentTimer(item, data);
-      return this.notifyPlatformOfNewTimers();
-    };
+      this.buildMyAssignmentTimer(item, data)
+      return this.notifyPlatformOfNewTimers()
+    }
 
-    Basecamp3Profile.prototype.buildMyAssignmentTimer = function(item, data) {
-      var content, timer;
-      timer = document.createElement("div");
-      timer.className = "harvest-timer";
-      this.addTimerAttributes(timer, data);
-      content = item.querySelector("h4") || item.querySelector(".checkbox__content");
-      return content.insertBefore(timer, content.querySelector(":first-child"));
-    };
+    Basecamp3Profile.prototype.buildMyAssignmentTimer = function (item, data) {
+      var content, timer
+      timer = document.createElement('div')
+      timer.className = 'harvest-timer'
+      this.addTimerAttributes(timer, data)
+      content =
+        item.querySelector('h4') || item.querySelector('.checkbox__content')
+      return content.insertBefore(timer, content.querySelector(':first-child'))
+    }
 
-    Basecamp3Profile.prototype.getDataForTimer = function(item) {
-      var groupName, itemName, link, linkParts;
-      itemName = (item.querySelector("a") || item.querySelector("h1")).innerText;
-      groupName = document.querySelector(this.groupNameSelector).innerText;
-      link = item.dataset.url;
-      linkParts = link.match(/^\/(\d+)\/buckets\/(\d+)(?:\S+)?\/(todo(?:list)?s\/\d+)/);
+    Basecamp3Profile.prototype.getDataForTimer = function (item) {
+      var groupName, itemName, link, linkParts
+      itemName = (item.querySelector('a') || item.querySelector('h1')).innerText
+      groupName = document.querySelector(this.groupNameSelector).innerText
+      link = item.dataset.url
+      linkParts = link.match(
+        /^\/(\d+)\/buckets\/(\d+)(?:\S+)?\/(todo(?:list)?s\/\d+)/
+      )
       return {
         account: {
-          id: linkParts[1]
+          id: linkParts[1],
         },
         group: {
           id: linkParts[2],
-          name: groupName
+          name: groupName,
         },
         item: {
           id: linkParts[3],
-          name: itemName
-        }
-      };
-    };
+          name: itemName,
+        },
+      }
+    }
 
-    Basecamp3Profile.prototype.getDataForMyAssignmentTimer = function(item, groupName) {
-      var itemName, link, linkParts, ref;
-      itemName = (item.querySelector("a") || item.querySelector("h1")).innerText;
-      link = (ref = item.querySelector("a")) != null ? ref.getAttribute("href") : void 0;
-      linkParts = link.match(/^\/(\d+)\/buckets\/(\d+)(?:\S+)?\/(todo(?:list)?s\/\d+)/);
+    Basecamp3Profile.prototype.getDataForMyAssignmentTimer = function (
+      item,
+      groupName
+    ) {
+      var itemName, link, linkParts, ref
+      itemName = (item.querySelector('a') || item.querySelector('h1')).innerText
+      link =
+        (ref = item.querySelector('a')) != null
+          ? ref.getAttribute('href')
+          : void 0
+      linkParts = link.match(
+        /^\/(\d+)\/buckets\/(\d+)(?:\S+)?\/(todo(?:list)?s\/\d+)/
+      )
       return {
         account: {
-          id: linkParts[1]
+          id: linkParts[1],
         },
         group: {
           id: linkParts[2],
-          name: groupName
+          name: groupName,
         },
         item: {
           id: linkParts[3],
-          name: itemName
-        }
-      };
-    };
+          name: itemName,
+        },
+      }
+    }
 
-    Basecamp3Profile.prototype.isTodoCompleted = function(item) {
-      return item.classList.contains("completed");
-    };
+    Basecamp3Profile.prototype.isTodoCompleted = function (item) {
+      return item.classList.contains('completed')
+    }
 
-    Basecamp3Profile.prototype.notEnoughInfo = function(data) {
-      var ref, ref1;
-      return !(((data != null ? (ref = data.group) != null ? ref.id : void 0 : void 0) != null) && ((data != null ? (ref1 = data.item) != null ? ref1.id : void 0 : void 0) != null));
-    };
+    Basecamp3Profile.prototype.notEnoughInfo = function (data) {
+      var ref, ref1
+      return !(
+        (data != null
+          ? (ref = data.group) != null
+            ? ref.id
+            : void 0
+          : void 0) != null &&
+        (data != null
+          ? (ref1 = data.item) != null
+            ? ref1.id
+            : void 0
+          : void 0) != null
+      )
+    }
 
-    Basecamp3Profile.prototype.addTimerAttributes = function(timer, data) {
-      timer.setAttribute("id", "harvest-basecamp-timer-" + data.item.id);
-      timer.setAttribute("data-account", JSON.stringify(data.account));
-      timer.setAttribute("data-group", JSON.stringify(data.group));
-      timer.setAttribute("data-item", JSON.stringify(data.item));
-      return timer.setAttribute("data-permalink", "https://3.basecamp.com/" + data.account.id + "/buckets/" + data.group.id + "/" + data.item.id);
-    };
+    Basecamp3Profile.prototype.addTimerAttributes = function (timer, data) {
+      timer.setAttribute('id', 'harvest-basecamp-timer-' + data.item.id)
+      timer.setAttribute('data-account', JSON.stringify(data.account))
+      timer.setAttribute('data-group', JSON.stringify(data.group))
+      timer.setAttribute('data-item', JSON.stringify(data.item))
+      return timer.setAttribute(
+        'data-permalink',
+        'https://3.basecamp.com/' +
+          data.account.id +
+          '/buckets/' +
+          data.group.id +
+          '/' +
+          data.item.id
+      )
+    }
 
-    Basecamp3Profile.prototype.notifyPlatformOfNewTimers = function() {
-      var evt;
-      evt = new CustomEvent("harvest-event:timers:chrome:add");
-      return this.platformXDMElement.dispatchEvent(evt);
-    };
+    Basecamp3Profile.prototype.notifyPlatformOfNewTimers = function () {
+      var evt
+      evt = new CustomEvent('harvest-event:timers:chrome:add')
+      return this.platformXDMElement.dispatchEvent(evt)
+    }
 
-    return Basecamp3Profile;
+    return Basecamp3Profile
+  })()
 
-  })();
-
-  new Basecamp3Profile();
-
-}).call(this);
+  new Basecamp3Profile()
+}).call(this)

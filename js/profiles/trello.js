@@ -1,153 +1,127 @@
-(function() {
-  var TrelloProfile, getJson, injectScript,
-    bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+;(function () {
+  const Selectors = {
+    HarvestTrelloTimer: '#harvest-trello-timer',
+    CardDetailWindow: '.xjFudI2rOfHcKY',
+    CardClass: '.QI4qitS2RefeF0',
+  }
 
-  getJson = function(url, cb) {
-    var req;
-    req = new XMLHttpRequest();
-    req.onload = function() {
-      return cb(JSON.parse(req.responseText));
-    };
-    req.open("GET", url, true);
-    return req.send();
-  };
+  const platformConfig = {
+    applicationName: 'Trello',
+    permalink: 'https://trello.com/c/%ITEM_ID%',
+  }
 
-  injectScript = function(opts) {
-    var name, ph, script, value;
-    script = document.createElement("script");
-    switch (typeof opts) {
-      case "object":
-        for (name in opts) {
-          value = opts[name];
-          script.setAttribute(name, value);
+  let timer
+
+  function configure() {
+    const script = document.createElement('script')
+    script.setAttribute('data-platform-config', JSON.stringify(platformConfig))
+
+    const firstScript = document.getElementsByTagName('script')[0]
+    firstScript.parentNode.insertBefore(script, firstScript)
+  }
+
+  function listen() {
+    document.body.addEventListener('harvest-event:ready', () => {
+      watchForCardChange()
+    })
+  }
+
+  function addTimerIfOnCard() {
+    const { pathname } = window.location
+    const [_, c, cardId] = pathname.split('/')
+
+    if (!(c === 'c' && cardId != null)) return
+    if (
+      !(
+        document.querySelector(Selectors.CardClass) ||
+        document.querySelector(Selectors.CardDetailWindow)
+      )
+    )
+      return
+    if (document.querySelector(Selectors.HarvestTrelloTimer)) return
+
+    addTimerToCard(cardId)
+  }
+
+  function watchForCardChange() {
+    const observer = new MutationObserver((mutationsList, _) => {
+      for (const mutation of mutationsList) {
+        if (mutation.type === 'childList') {
+          for (const node of mutation.addedNodes) {
+            if (
+              node.nodeType === 1 &&
+              (node.matches(Selectors.CardClass) ||
+                node.matches(Selectors.CardDetailWindow))
+            ) {
+              addTimerIfOnCard()
+            }
+          }
         }
-        break;
-      case "string":
-        script.innerHTML = opts;
-    }
-    ph = document.getElementsByTagName("script")[0];
-    return ph.parentNode.insertBefore(script, ph);
-  };
-
-  TrelloProfile = (function() {
-    function TrelloProfile() {
-      this.hydrateTimer = bind(this.hydrateTimer, this);
-      this.addTimer = bind(this.addTimer, this);
-      this.addTimerIfOnCard = bind(this.addTimerIfOnCard, this);
-      this.actionSelector = ".window-sidebar";
-      this.platformLoaded = false;
-      this.listen();
-      this.infect();
-    }
-
-    TrelloProfile.prototype.listen = function() {
-      document.body.addEventListener("harvest-event:ready", (function(_this) {
-        return function() {
-          _this.platformLoaded = true;
-          return _this.addTimerIfOnCard();
-        };
-      })(this));
-      return chrome.runtime.onMessage.addListener((function(_this) {
-        return function(request) {
-          if (request.trelloUrlChanged != null) {
-            return _this.addTimerIfOnCard();
-          }
-        };
-      })(this));
-    };
-
-    TrelloProfile.prototype.infect = function() {
-      return injectScript({
-        "data-platform-config": JSON.stringify(this.platformConfig())
-      });
-    };
-
-    TrelloProfile.prototype.platformConfig = function() {
-      return {
-        applicationName: "Trello"
-      };
-    };
-
-    TrelloProfile.prototype.addTimerIfOnCard = function() {
-      var _, c, cardId, ref;
-      ref = window.location.pathname.split("/"), _ = ref[0], c = ref[1], cardId = ref[2];
-      if (!(c === "c" && (cardId != null))) {
-        return;
       }
-      if (document.getElementById('harvest-trello-timer')) {
-        return;
+    })
+    observer.observe(document.body, { childList: true, subtree: true })
+  }
+
+  function addTimerToCard(cardId) {
+    buildTimer()
+    fetchCardData(cardId, hydrateTimer)
+  }
+
+  function fetchCardData(cardId, cb) {
+    const url = `https://trello.com/1/cards/${cardId}?fields=name,shortLink&board=true&board_fields=name`
+    getJson(url, (cardData) => {
+      const board = cardData.board
+      const card = {
+        id: cardData.shortLink,
+        name: cardData.name,
       }
-      return this.whenReadyForTimer((function(_this) {
-        return function() {
-          return _this.addTimer(cardId);
-        };
-      })(this));
-    };
+      cb(board, card)
+    })
+  }
 
-    TrelloProfile.prototype.whenReadyForTimer = function(callback) {
-      var poll;
-      poll = (function(_this) {
-        return function() {
-          if (!document.querySelector(_this.actionSelector)) {
-            return;
-          }
-          window.clearInterval(_this.interval);
-          return callback();
-        };
-      })(this);
-      window.clearInterval(this.interval);
-      return this.interval = window.setInterval(poll, 200);
-    };
+  function buildTimer() {
+    const container = document.createElement('div')
+    container.className = 'window-module u-clearfix'
+    container.innerHTML = `
+      <h4 style="color: #44546f; font-size: 12px; line-height: 20px; margin-top: 20px;">Harvest</h4>
+      <div class="u-clearfix">
+        <a class="button-link" id="harvest-trello-timer">
+          <span class="harvest-trello-timer-icon icon-sm icon-clock"></span><span class="js-sidebar-action-text">Track Time</span>
+        </a>
+      </div>
+    `
+    timer = container.querySelector('a')
 
-    TrelloProfile.prototype.addTimer = function(cardId) {
-      this.buildTimer();
-      return this.fetchCardData(cardId, this.hydrateTimer);
-    };
+    const links = document.querySelectorAll('a')
+    let foundLink
+    links.forEach(
+      (link) => (foundLink = link.href.includes('power-ups') ? link : null)
+    )
+    const powerUpsSection = foundLink.closest('section')
+    powerUpsSection.prepend(container)
+  }
 
-    TrelloProfile.prototype.fetchCardData = function(cardId, cb) {
-      var url;
-      url = "https://trello.com/1/cards/" + cardId + "?fields=name,shortLink&board=true&board_fields=name";
-      return getJson(url, function(cardData) {
-        var board, card;
-        board = cardData.board;
-        card = {
-          id: cardData.shortLink,
-          name: cardData.name
-        };
-        return cb(board, card);
-      });
-    };
+  function hydrateTimer(board, card) {
+    timer.setAttribute('data-group', JSON.stringify(board))
+    timer.setAttribute('data-item', JSON.stringify(card))
+    timer.setAttribute('data-permalink', 'https://trello.com/c/' + card.id)
+    timer.setAttribute('data-skip-styling', true)
+    timer.classList.remove('disabled')
+    timer.classList.add('harvest-timer')
+    notifyPlatformOfNewTimers()
+  }
 
-    TrelloProfile.prototype.buildTimer = function() {
-      var actions, container;
-      container = document.createElement('div');
-      container.className = 'window-module u-clearfix';
-      container.innerHTML = "<h3 class=\"mod-no-top-margin\">Harvest</h3>\n<div class=\"u-clearfix\">\n  <a class=\"button-link\" id=\"harvest-trello-timer\">\n    <span class=\"harvest-trello-timer-icon icon-sm icon-clock\"></span><span class=\"js-sidebar-action-text\">Track Time</span>\n  </a>\n</div>";
-      this.timer = container.querySelector('a');
-      actions = document.querySelector(this.actionSelector);
-      return actions.appendChild(container);
-    };
+  function notifyPlatformOfNewTimers() {
+    const evt = new CustomEvent('harvest-event:timers:chrome:add')
+    document.querySelector('#harvest-messaging').dispatchEvent(evt)
+  }
 
-    TrelloProfile.prototype.hydrateTimer = function(board, card) {
-      this.timer.setAttribute("data-group", JSON.stringify(board));
-      this.timer.setAttribute("data-item", JSON.stringify(card));
-      this.timer.setAttribute("data-permalink", "https://trello.com/c/" + card.id);
-      this.timer.setAttribute("data-skip-styling", true);
-      this.timer.classList.remove("disabled");
-      this.timer.classList.add("harvest-timer");
-      return this.notifyPlatformOfNewTimers();
-    };
+  function getJson(url, cb) {
+    fetch(url)
+      .then((response) => response.json())
+      .then((json) => cb(json))
+  }
 
-    TrelloProfile.prototype.notifyPlatformOfNewTimers = function() {
-      var evt;
-      evt = new CustomEvent("harvest-event:timers:chrome:add");
-      return document.querySelector("#harvest-messaging").dispatchEvent(evt);
-    };
-
-    return TrelloProfile;
-
-  })();
-
-  new TrelloProfile();
-
-}).call(this);
+  configure()
+  listen()
+}).call(this)

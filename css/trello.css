@@ -12,3 +12,7 @@
 .harvest-timer.running .harvest-trello-timer-icon {
   color: #fff;
 }
+
+.harvest-timer.running:hover .harvest-trello-timer-icon {
+  color: #42526e;
+}

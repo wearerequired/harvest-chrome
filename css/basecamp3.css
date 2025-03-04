@@ -7,7 +7,8 @@ div.harvest-timer.styled {
   position: relative;
 }
 
-.todolist .todo[data-url] div.harvest-timer.styled, .todos.remaining div.harvest-timer.styled {
+.todolist .todo[data-url] div.harvest-timer.styled,
+.todos.remaining div.harvest-timer.styled {
   width: 1.4em;
   height: 1.4em;
   border-radius: 0.3em;
