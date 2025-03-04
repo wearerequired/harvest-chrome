@@ -33,7 +33,8 @@
 	},
 	"permissions": [
 		"notifications",
-		"webNavigation"
+		"webNavigation",
+		"storage"
 	],
 	"content_scripts": [
 		{
