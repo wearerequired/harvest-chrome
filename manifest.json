@@ -1,87 +1,145 @@
 {
-  "update_url": "https://clients2.google.com/service/update2/crx",
-  "version": "4.1.1.3",
-  "name": "required Time Tracker",
-  "description": "Track time from Chrome and within popular project management tools.",
-  "author": "required gmbh",
-  "manifest_version": 3,
-  "icons": {
-    "16": "images/h-app@16px.png",
-    "48": "images/h-app@48px.png",
-    "128": "images/h-app@128px.png"
-  },
-  "action": {
-    "default_icon": {
-      "19": "images/h-toolbar-off@19px.png",
-      "38": "images/h-toolbar-off@38px.png"
-    },
-    "default_title": "Start a Harvest timer",
-    "default_popup": "popup.html"
-  },
-  "commands": {
-    "_execute_action": {
-      "suggested_key": {
-        "default": "Alt+Shift+H"
-      }
-    }
-  },
-  "background": {
-    "service_worker": "service-worker.js"
-  },
-  "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'self'"
-  },
-  "permissions": [
-    "notifications",
-    "webNavigation"
-  ],
-  "content_scripts": [
-    {
-      "matches": [ "https://basecamp.com/*" ],
-      "js": [
-        "js/profiles/basecamp2.js",
-        "js/platform.js"
-      ]
-    },
-    {
-      "matches": [ "https://3.basecamp.com/*" ],
-      "js": [
-        "js/profiles/basecamp3.js",
-        "js/platform.js"
-      ],
-      "css": [ "css/basecamp3.css" ]
-    },
-    {
-      "matches": [ "https://trello.com/*" ],
-      "js": [
-        "js/profiles/trello.js",
-        "js/platform.js"
-      ],
-      "css": [ "css/trello.css" ]
-    },
-    {
-      "matches": [ "https://github.com/*" ],
-      "js": [
-        "js/profiles/github.js",
-        "js/platform.js"
-      ],
-      "css": [ "css/github.css" ]
-    },
-    {
-      "matches": [ "https://app.asana.com/*" ],
-      "js": [
-        "js/profiles/asana.js",
-        "js/platform.js"
-      ],
-      "css": [ "css/asana.css" ]
-    },
-    {
-      "matches": [ "https://secure.helpscout.net/*" ],
-      "js": [
-        "js/profiles/helpscout.js",
-        "js/platform.js"
-      ],
-      "css": [ "css/helpscout.css" ]
-    }
-  ]
+	"update_url": "https://clients2.google.com/service/update2/crx",
+	"version": "4.1.1.5",
+	"name": "required Time Tracker",
+	"description": "Track time from Chrome and within popular project management tools.",
+	"author": "required gmbh",
+	"manifest_version": 3,
+	"icons": {
+		"16": "images/h-app@16px.png",
+		"48": "images/h-app@48px.png",
+		"128": "images/h-app@128px.png"
+	},
+	"action": {
+		"default_icon": {
+			"19": "images/h-toolbar-off@19px.png",
+			"38": "images/h-toolbar-off@38px.png"
+		},
+		"default_title": "Start a Harvest timer",
+		"default_popup": "popup.html"
+	},
+	"commands": {
+		"_execute_action": {
+			"suggested_key": {
+				"default": "Alt+Shift+H"
+			}
+		}
+	},
+	"background": {
+		"service_worker": "service-worker.js"
+	},
+	"content_security_policy": {
+		"extension_pages": "script-src 'self'; object-src 'self'"
+	},
+	"permissions": [
+		"notifications",
+		"storage"
+	],
+	"content_scripts": [
+		{
+			"matches": [
+				"https://basecamp.com/*"
+			],
+			"js": [
+				"js/profiles/basecamp2.js",
+				"js/platform.js"
+			]
+		},
+		{
+			"matches": [
+				"https://3.basecamp.com/*"
+			],
+			"js": [
+				"js/profiles/basecamp3.js",
+				"js/platform.js"
+			],
+			"css": [
+				"css/basecamp3.css"
+			]
+		},
+		{
+			"matches": [
+				"https://trello.com/*"
+			],
+			"js": [
+				"js/profiles/trello.js",
+				"js/platform.js"
+			],
+			"css": [
+				"css/trello.css"
+			]
+		},
+		{
+			"matches": [
+				"https://github.com/*"
+			],
+			"js": [
+				"js/profiles/github.js",
+				"js/platform.js"
+			],
+			"css": [
+				"css/github.css"
+			]
+		},
+		{
+			"matches": [
+				"https://app.asana.com/*"
+			],
+			"js": [
+				"js/profiles/asana.js",
+				"js/platform.js"
+			],
+			"css": [
+				"css/asana.css"
+			]
+		},
+		{
+			"matches": [
+				"https://linear.app/*"
+			],
+			"js": [
+				"js/profiles/linear.js",
+				"js/platform.js"
+			],
+			"css": [
+				"css/linear.css"
+			]
+		},
+		{
+			"matches": [
+				"https://*.notion.so/*"
+			],
+			"js": [
+				"js/profiles/notion.js",
+				"js/platform.js"
+			],
+			"css": [
+				"css/notion.css"
+			]
+		},
+		{
+			"matches": [
+				"https://*.monday.com/*"
+			],
+			"js": [
+				"js/profiles/monday.js",
+				"js/platform.js"
+			],
+			"css": [
+				"css/monday.css"
+			]
+		},
+		{
+			"matches": [
+				"https://secure.helpscout.net/*"
+			],
+			"js": [
+				"js/profiles/helpscout.js",
+				"js/platform.js"
+			],
+			"css": [
+				"css/helpscout.css"
+			]
+		}
+	]
 }
