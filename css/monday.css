@@ -1,0 +1,90 @@
+@keyframes harvestClockRotateThreeSixty {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.harvest-timer {
+  display: flex;
+  padding: 7.5px;
+  border-radius: 4px;
+  align-items: center;
+  cursor: pointer;
+  min-width: 105px;
+}
+
+.harvest-timer:hover,
+.harvest-timer.running {
+  background-color: #f0f0f1;
+}
+
+.harvest-button-span::after {
+  content: 'Start timer';
+  display: flex;
+  margin-left: 4px;
+  font-size: 14px;
+  font-weight: 200;
+  line-height: 16px;
+  color: #323338;
+}
+
+.harvest-button-span.running::after {
+  content: 'Stop timer';
+  font-size: 14px;
+  line-height: 16px;
+  color: #323338;
+}
+
+.harvest-button-span.running:hover::after {
+  background-color: #efefef;
+}
+
+.harvest-timer.running .minute-hand {
+  animation: harvestClockRotateThreeSixty 3s infinite linear;
+  transform-origin: 50%;
+}
+
+.harvest-timer.running .hour-hand {
+  animation: harvestClockRotateThreeSixty 15s infinite linear;
+  transform-origin: 50%;
+}
+
+/* Styles for dark mode */
+body#main.dark-app-theme .harvest-timer:hover,
+body#main.dark-app-theme .harvest-timer.running,
+body#main.dark-app-theme .harvest-timer.running::after,
+body#main.dark-app-theme .harvest-button-span.running:hover::after {
+  background-color: #303249;
+}
+body#main.dark-app-theme .harvest-button-span::after,
+body#main.dark-app-theme .harvest-button-span.running::after {
+  font-weight: 100;
+  color: #d5d8df;
+}
+
+body#main.dark-app-theme #harvest-monday-svg path,
+body#main.dark-app-theme #harvest-monday-svg circle {
+  stroke: #d5d8df;
+}
+
+/* Styles for night mode */
+body#main.black-app-theme .harvest-timer:hover,
+body#main.black-app-theme .harvest-timer.running,
+body#main.black-app-theme .harvest-timer.running::after,
+body#main.black-app-theme .harvest-button-span.running:hover::after {
+  background-color: #2b2b31;
+}
+
+body#main.black-app-theme .harvest-button-span::after,
+body#main.black-app-theme .harvest-button-span.running::after {
+  font-weight: 100;
+  color: #d5d8df;
+}
+
+body#main.black-app-theme #harvest-monday-svg path,
+body#main.black-app-theme #harvest-monday-svg circle {
+  stroke: #d5d8df;
+}

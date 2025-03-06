@@ -33,7 +33,6 @@
 	},
 	"permissions": [
 		"notifications",
-		"webNavigation",
 		"storage"
 	],
 	"content_scripts": [
@@ -96,6 +95,18 @@
 		},
 		{
 			"matches": [
+				"https://linear.app/*"
+			],
+			"js": [
+				"js/profiles/linear.js",
+				"js/platform.js"
+			],
+			"css": [
+				"css/linear.css"
+			]
+		},
+		{
+			"matches": [
 				"https://*.notion.so/*"
 			],
 			"js": [
@@ -104,6 +115,18 @@
 			],
 			"css": [
 				"css/notion.css"
+			]
+		},
+		{
+			"matches": [
+				"https://*.monday.com/*"
+			],
+			"js": [
+				"js/profiles/monday.js",
+				"js/platform.js"
+			],
+			"css": [
+				"css/monday.css"
 			]
 		},
 		{

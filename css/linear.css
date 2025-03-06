@@ -1,0 +1,114 @@
+.harvest-timer .minute-hand {
+  transform: rotate(90deg);
+  transform-origin: 50% 50%;
+}
+
+.harvest-timer.running .minute-hand {
+  animation: rotateThreeSixty 3s infinite linear;
+  transform-origin: 50% 50%;
+}
+
+.harvest-timer.running .hour-hand {
+  animation: rotateThreeSixty 12s infinite linear;
+  transform-origin: 50% 50%;
+}
+
+.harvest-timer.running {
+  background-color: rgba(241, 241, 241, 0.5);
+}
+
+.harvest-timer.running:hover {
+  background-color: rgba(241, 241, 241, 1);
+}
+
+.harvest-timer.running path[fill-rule] {
+  fill: #fa5d00;
+}
+
+.harvest-timer-container {
+  padding-bottom: 12px;
+  margin-left: -6px;
+}
+
+.harvest-timer-container button {
+  display: inline-flex;
+  -webkit-box-align: center;
+  align-items: center;
+  white-space: nowrap;
+  margin: 0px;
+  border-radius: 5px;
+  font-weight: 500;
+  line-height: normal;
+  transition-property: border, background-color, color, opacity;
+  transition-duration: var(--speed-highlightFadeOut);
+  user-select: none;
+  app-region: no-drag;
+  font-size: var(--font-size-small);
+  padding: 0px 6px;
+  text-align: left;
+  height: 28px;
+  flex-shrink: 1;
+  -webkit-box-flex: 1;
+  flex-grow: 1;
+  -webkit-box-pack: start;
+  justify-content: flex-start;
+  color: rgb(47, 47, 49);
+  box-shadow: none;
+  border: none;
+  background-color: transparent;
+  min-width: 140px;
+  position: relative;
+}
+
+html.dark .harvest-timer-container button {
+  color: rgb(153, 155, 158);
+}
+
+html.dark .harvest-timer-container button.running {
+  color: rgb(227, 229, 232);
+}
+
+.harvest-timer-container button:hover {
+  transition-duration: var(--speed-highlightFadeIn);
+  background-color: rgb(241, 241, 241);
+}
+
+html.dark .harvest-timer-container button:hover {
+  background-color: rgb(32, 33, 36);
+}
+
+.harvest-timer-header {
+  margin: 16px 0px 10px 6px;
+  font-style: normal;
+  text-align: left;
+  color: rgb(92, 92, 94);
+  line-height: normal;
+  font-size: var(--font-size-miniPlus);
+  font-weight: 500;
+}
+
+html.dark .harvest-timer-header {
+  color: rgb(153, 155, 158);
+}
+
+button.harvest-timer span:after {
+  content: 'Start timer';
+}
+
+button.harvest-timer.running span:after {
+  content: 'Stop timer';
+}
+
+button.harvest-timer svg {
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+@keyframes rotateThreeSixty {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
