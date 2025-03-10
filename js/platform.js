@@ -21,7 +21,9 @@ document.addEventListener("keyup", ({
 function open(url, timer) {
   iframe.src = url;
   timer.insertAdjacentElement("afterend", dialog);
-  dialog.showModal();
+  if(!dialog.open) {
+    requestAnimationFrame(() => dialog.showModal())
+  }
 }
 function close() {
   dialog.close();
