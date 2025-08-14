@@ -99,7 +99,7 @@
 
     Basecamp3Profile.prototype.addToDoListTimer = function (item) {
       var data
-      data = this.getDataForTimer(item)
+      data = this.getDataForTimer(item, this.extractToDoListItemName)
       if (this.notEnoughInfo(data)) {
         return
       }
@@ -131,7 +131,7 @@
 
     Basecamp3Profile.prototype.addToDoItemTimer = function (item) {
       var data
-      data = this.getDataForTimer(item)
+      data = this.getDataForTimer(item, this.extractToDoItemName)
       if (this.isTodoCompleted(item) || this.notEnoughInfo(data)) {
         return
       }
@@ -162,7 +162,7 @@
     Basecamp3Profile.prototype.addFullPageToDoTimer = function (page) {
       var data, item
       item = page.querySelector('.todo[data-url]')
-      data = this.getDataForTimer(item)
+      data = this.getDataForTimer(item, this.extractToDoItemName)
       if (this.isTodoCompleted(item) || this.notEnoughInfo(data)) {
         return
       }
@@ -264,7 +264,11 @@
       groupName
     ) {
       var data
-      data = this.getDataForMyAssignmentTimer(item, groupName)
+      data = this.getDataForMyAssignmentTimer(
+        item,
+        groupName,
+        this.extractToDoItemName
+      )
       if (this.notEnoughInfo(data)) {
         return
       }
@@ -282,9 +286,22 @@
       return content.insertBefore(timer, content.querySelector(':first-child'))
     }
 
-    Basecamp3Profile.prototype.getDataForTimer = function (item) {
+    Basecamp3Profile.prototype.extractToDoListItemName = function (item) {
+      return (
+        item.querySelector('.todolist__title a') || item.querySelector('a')
+      ).innerText
+    }
+
+    Basecamp3Profile.prototype.extractToDoItemName = function (item) {
+      return (item.querySelector('a') || item.querySelector('h1')).innerText
+    }
+
+    Basecamp3Profile.prototype.getDataForTimer = function (
+      item,
+      extractItemName
+    ) {
       var groupName, itemName, link, linkParts
-      itemName = (item.querySelector('a') || item.querySelector('h1')).innerText
+      itemName = extractItemName(item)
       groupName = document.querySelector(this.groupNameSelector).innerText
       link = item.dataset.url
       linkParts = link.match(
@@ -307,10 +324,11 @@
 
     Basecamp3Profile.prototype.getDataForMyAssignmentTimer = function (
       item,
-      groupName
+      groupName,
+      extractItemName
     ) {
       var itemName, link, linkParts, ref
-      itemName = (item.querySelector('a') || item.querySelector('h1')).innerText
+      itemName = extractItemName(item)
       link =
         (ref = item.querySelector('a')) != null
           ? ref.getAttribute('href')

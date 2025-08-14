@@ -39,6 +39,26 @@
     observer.observe(document.body, config)
   }
 
+  const TaskNameSelectors = [
+    '.item-page-item-name h2',
+    '.pulse_title h2',
+    '.pulse-page-name-wrapper .ds-text-component-content-text', // Kanban view
+  ]
+
+  const TimerLocationElementSelectors = [
+    '.item-page-header-component__actions-bar',
+    '.pulse_subscribers_wrapper',
+    '.pulse-page-name-wrapper .ds-text-component', // Kanban view header
+  ]
+
+  function findElement(selectors) {
+    for (const selector of selectors) {
+      const element = document.querySelector(selector)
+      if (element) return element
+    }
+    return null
+  }
+
   function addTimer() {
     const taskId = window.location.href.split('pulses/')[1]
 
@@ -46,15 +66,10 @@
       return
     }
 
-    //get task name from crm/dev or work management product views
-    const viewTaskName =
-      document.querySelector('.item-page-item-name h2') ||
-      document.querySelector('.pulse_title h2')
-    //get insertion element from crm/dev or work management product views
-    const insertionEl =
-      document.querySelector('.item-page-header-component__actions-bar') ||
-      document.querySelector('.pulse_subscribers_wrapper')
-
+    // Get task name from crm/dev or work management product views
+    const viewTaskName = findElement(TaskNameSelectors)
+    // Get insertion element from crm/dev or work management product views
+    const insertionEl = findElement(TimerLocationElementSelectors)
     const accountName = window.location.host.split('.')[0]
     const [boardId] = window.location.pathname
       .split('/')

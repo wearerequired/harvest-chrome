@@ -1,8 +1,8 @@
 ;(function () {
   const Selectors = {
-    PeekTopbarActions: '.notion-peek-renderer .notion-topbar-comments-button',
+    PeekTopbarActions: '.notion-peek-renderer .notion-topbar-favorite-button',
     TaskName: '.notion-peek-renderer h1',
-    TopbarCommentsButton: '.notion-topbar-comments-button',
+    TopbarFavoriteButton: '.notion-topbar-favorite-button',
     SlidePanel: 'div.whenContentEditable[role="textbox"]',
   }
 
@@ -55,7 +55,7 @@
         if (!addedNode.matches) continue
 
         // when sidebar is opened, a new topbar is added check for that via updates button
-        if (addedNode.querySelector(Selectors.TopbarCommentsButton)) {
+        if (addedNode.querySelector(Selectors.TopbarFavoriteButton)) {
           whenPeekReadyForTimer(addTimerToPeekTopBar)
         }
 

@@ -29,8 +29,20 @@
     SpreadsheetTaskName: '.SpreadsheetRow .SpreadsheetTaskName',
     SpreadsheetButtonArea:
       '.SpreadsheetGridTaskNameAndDetailsCellGroup-detailsButtonClickArea',
+    SpreadsheetTaskNameAndButtonArea:
+      '.SpreadsheetGridTaskNameAndDetailsCellGroup',
     Board: '.Board',
     BoardCard: '.BoardCardLayout',
+  }
+
+  const ViewContext = {
+    listView: 'listView',
+    boardView: 'boardView',
+  }
+
+  const ContentSelectorForViewContext = {
+    [ViewContext.listView]: Selectors.SpreadsheetTaskNameAndButtonArea,
+    [ViewContext.boardView]: Selectors.BoardCard,
   }
 
   function onNodeAdded(element) {
@@ -47,20 +59,52 @@
     }
   }
 
-  function observeElement(selector) {
-    const observer = new MutationObserver((mutationsList, _) => {
+  function createObserverForSelector(selector, onMatchingNode) {
+    return new MutationObserver((mutationsList, _) => {
       for (const mutation of mutationsList) {
         if (mutation.type === 'childList') {
           for (const node of mutation.addedNodes) {
             if (node.nodeType === 1 && node.matches(selector)) {
-              onNodeAdded(node)
+              onMatchingNode(node)
             }
           }
         }
       }
     })
+  }
 
-    observer.observe(document.body, { childList: true, subtree: true })
+  function observeElement(selector) {
+    createObserverForSelector(selector, onNodeAdded).observe(document.body, {
+      childList: true,
+      subtree: true,
+    })
+  }
+
+  function observeElementAndContents(containerSelector, context) {
+    if (!Object.values(ViewContext).includes(context)) {
+      throw new Error(`Invalid context: ${context}`)
+    }
+
+    const contentSelector = ContentSelectorForViewContext[context]
+    const contentObserver = createObserverForSelector('*', (node) => {
+      const itemElements = node.querySelectorAll(contentSelector)
+
+      if (itemElements.length > 0) {
+        if (context === ViewContext.boardView) {
+          addTotalHoursToCards(itemElements)
+        } else if (context === ViewContext.listView) {
+          addTotalHoursToSpreadsheetTasks(itemElements)
+        }
+      }
+    })
+
+    const parentObserver = createObserverForSelector(
+      containerSelector,
+      (node) =>
+        contentObserver.observe(node, { childList: true, subtree: true })
+    )
+
+    parentObserver.observe(document.body, { childList: true, subtree: true })
   }
 
   document.body.addEventListener('harvest-event:ready', initializePage, {
@@ -103,8 +147,11 @@
     if (!Object.keys(settings).length) return
 
     observeElement(Selectors.SpreadsheetHeaderPreload) // watch for header on list view
-    observeElement(Selectors.Board) // watch for board view
-    observeElement(Selectors.SpreadsheetGridScroller) // watch for tasks container on list view
+    observeElementAndContents(Selectors.Board, ViewContext.boardView) // watch for tasks on board view (initial or pagination)
+    observeElementAndContents(
+      Selectors.SpreadsheetGridScroller,
+      ViewContext.listView
+    ) // watch for tasks on list view (initial or pagination)
     observeElement(Selectors.TaskWrapper) // watch for task detail view
 
     // initial render
@@ -206,12 +253,13 @@
     }
   }
 
-  function addTotalHoursToSpreadsheetTasks() {
-    const tasks = document.querySelectorAll(
-      Selectors.SpreadsheetTaskName +
-        ':not([data-harvest-platform-external-item-id])'
-    )
-
+  function addTotalHoursToSpreadsheetTasks(specificTasks) {
+    const tasks =
+      specificTasks ||
+      document.querySelectorAll(
+        Selectors.SpreadsheetTaskNameAndButtonArea +
+          ':not(:has([data-harvest-platform-external-item-id]))'
+      )
     if (!tasks.length) return
 
     tasks.forEach(async (task) => {
@@ -220,7 +268,7 @@
 
       const taskId = textarea.id.split('_').pop()
       const totalHoursEl = await totalHoursElement(taskId, 'listView')
-      const taskInsertionElement = task.parentElement.querySelector(
+      const taskInsertionElement = task.querySelector(
         Selectors.SpreadsheetButtonArea
       )
 
@@ -232,10 +280,13 @@
     })
   }
 
-  function addTotalHoursToCards() {
-    const cards = document.querySelectorAll(
-      Selectors.BoardCard + ':not([data-harvest-platform-external-item-id])'
-    )
+  function addTotalHoursToCards(specificTasks) {
+    const cards =
+      specificTasks ||
+      document.querySelectorAll(
+        Selectors.BoardCard +
+          ':not(:has([data-harvest-platform-external-item-id]))'
+      )
 
     if (!cards.length) return
 

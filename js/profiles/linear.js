@@ -57,16 +57,16 @@
       .split('//')[1]
       .split('/')
 
-    const xpath = '//main/div[2]/div/div[1]/div[2]/div/div[2]/div[last()]'
-    const addToProjectSection = document.evaluate(
-      xpath,
-      document,
-      null,
-      XPathResult.FIRST_ORDERED_NODE_TYPE,
-      null
-    )?.singleNodeValue
+    const sideNav = (
+      document.querySelector(
+        'div[data-contextual-menu]:has([data-detail-button="true"])'
+      ) ||
+      document
+        .querySelector('button[aria-label="Copy issue URL"]')
+        ?.closest('div[data-contextual-menu]')
+    )?.lastElementChild
 
-    if (!addToProjectSection) {
+    if (!sideNav) {
       console.warn(
         'No linear sidebar/contextual menu section found, not on an issue or class names/structure have changed'
       )
@@ -75,10 +75,10 @@
 
     const buttonContainer = buildTimerForIssue(groupId, issueId, issueSlug)
 
-    if (addToProjectSection.querySelector('.harvest-timer')) {
-      addToProjectSection.querySelector('.harvest-timer').remove()
+    if (sideNav.querySelector('.harvest-timer')) {
+      sideNav.querySelector('.harvest-timer').remove()
     }
-    addToProjectSection.append(buttonContainer)
+    sideNav.append(buttonContainer)
     notifyPlatformOfNewTimer(buttonContainer.querySelector('button'))
   }
 

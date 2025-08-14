@@ -15,6 +15,10 @@ div.harvest-timer.styled {
   margin-right: 3px;
 }
 
+.todolist__header div.harvest-timer.styled {
+  vertical-align: baseline;
+}
+
 div.harvest-timer.styled .harvest-timer-icon {
   position: absolute;
   top: 50%;

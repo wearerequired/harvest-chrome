@@ -52,6 +52,11 @@
   transform-origin: 50%;
 }
 
+.pulse-page-name-wrapper:has(.harvest-timer) {
+  display: flex;
+  flex-direction: row-reverse;
+}
+
 /* Styles for dark mode */
 body#main.dark-app-theme .harvest-timer:hover,
 body#main.dark-app-theme .harvest-timer.running,
