@@ -1,8 +1,10 @@
 ;(function () {
   const Selectors = {
+    MainTopbarActions: '.notion-topbar .notion-topbar-more-button',
     PeekTopbarActions: '.notion-peek-renderer .notion-topbar-more-button',
-    TaskName: '.notion-peek-renderer h1',
-    TopbarMoreButton: '.notion-topbar-more-button',
+    MainTaskName: 'main h1',
+    PeekTaskName: '.notion-peek-renderer h1',
+    PeekTopbarMoreButton: '.notion-peek-renderer .notion-topbar-more-button',
     SlidePanel: 'div.whenContentEditable[role="textbox"]',
   }
 
@@ -23,17 +25,37 @@
 
   function listen() {
     document.body.addEventListener('harvest-event:ready', () => {
-      whenPeekReadyForTimer(() => addTimerToPeekTopBar())
+      whenPeekReadyForTimer(addTimerToPeekTopBar)
+      whenMainReadyForTimer(addTimerToMainTopBar)
       watchForDocumentChanges()
     })
   }
 
+  function addTimerToMainTopBar() {
+    const name = document.querySelector(Selectors.MainTaskName).innerHTML
+    const id = window.location.pathname.split('/').pop().split('-').pop()
+    const item = { name, id }
+    const button = buildTimerButton(item)
+    const existingButton = document.querySelector('.notion-topbar .harvest-timer')
+
+    if (existingButton) {
+      existingButton.replaceWith(button)
+    } else {
+      const topbarActions = document.querySelector(
+        Selectors.MainTopbarActions
+      ).parentElement
+      topbarActions.prepend(button)
+    }
+
+    notifyPlatformOfNewTimer(button)
+  }
+
   function addTimerToPeekTopBar() {
-    const name = document.querySelector(Selectors.TaskName).innerHTML
+    const name = document.querySelector(Selectors.PeekTaskName).innerHTML
     const id = new URLSearchParams(window.location.search).get('p')
     const item = { name, id }
     const button = buildTimerButton(item)
-    const existingButton = document.querySelector('.harvest-timer')
+    const existingButton = document.querySelector('.notion-peek-renderer .harvest-timer')
 
     if (existingButton) {
       existingButton.replaceWith(button)
@@ -54,8 +76,13 @@
         const [addedNode] = addedNodes
         if (!addedNode.matches) continue
 
+		// check for new main topbar breadcrumb
+		if (addedNode.querySelector(':is(.shadow-cursor-breadcrumb *)')) {
+          whenMainReadyForTimer(addTimerToMainTopBar)
+        }
+
         // when sidebar is opened, a new topbar is added check for that via updates button
-        if (addedNode.querySelector(Selectors.TopbarMoreButton)) {
+        if (addedNode.querySelector(Selectors.PeekTopbarMoreButton)) {
           whenPeekReadyForTimer(addTimerToPeekTopBar)
         }
 
@@ -70,10 +97,22 @@
     observer.observe(document.body, config)
   }
 
+  function whenMainReadyForTimer(callback) {
+      const poll = () => {
+		if (!document.querySelector(Selectors.MainTopbarActions)) return
+        if (!document.querySelector(Selectors.MainTaskName)) return
+        window.clearInterval(interval)
+        callback()
+      }
+
+      window.clearInterval(interval)
+      interval = window.setInterval(poll, 200)
+    }
+
   function whenPeekReadyForTimer(callback) {
     const poll = () => {
       if (!document.querySelector(Selectors.PeekTopbarActions)) return
-      if (!document.querySelector(Selectors.TaskName)) return
+      if (!document.querySelector(Selectors.PeekTaskName)) return
       window.clearInterval(interval)
       callback()
     }
