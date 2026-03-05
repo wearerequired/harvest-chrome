@@ -1,14 +1,30 @@
+.harvest-timer .Button-label:after {
+  content: 'Track time';
+}
+
 .harvest-timer.running {
-  background: linear-gradient(to bottom, #53b2fc, #1385e5);
-  border-color: #075fa9;
+  background: #fa5d00;
+  border-color: #df4b00;
   color: #fff;
 }
 
+.harvest-timer.running .Button-label:after {
+  content: 'Stop timer';
+}
+
+.harvest-timer.running svg {
+  fill: #fff;
+}
+
 .harvest-timer.running:hover {
-  background: linear-gradient(to bottom, #2ba0fb, #106fbf);
-  border-color: #054982;
+  background: #df4b00 !important;
+  border-color: #df4b00 !important;
 }
 
 [data-component='PH_Actions'] .harvest-timer {
   font-size: 14px;
+}
+
+.harvest-dialog[open] {
+  position: fixed !important;
 }

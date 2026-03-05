@@ -33,13 +33,21 @@
 
     const callback = (mutationlist, _) => {
       for (const mutation of mutationlist) {
-        if (
+        const hasIssueContent =
           mutation.target.matches &&
           mutation.addedNodes.length &&
           (mutation.target.matches(Selectors.Main) ||
             mutation.target.matches(Selectors.Toolbar) ||
             mutation.target.querySelector(Selectors.IssueView))
-        ) {
+
+        const hasTitleElement = Array.from(mutation.addedNodes).some(
+          (node) =>
+            node.nodeType === Node.ELEMENT_NODE &&
+            node.matches &&
+            node.matches('[role="textbox"][aria-label="Issue title"]')
+        )
+
+        if (hasIssueContent || hasTitleElement) {
           document.querySelector('.harvest-timer-container')?.remove()
           addTimerToSidebar(mutation)
         }
@@ -82,6 +90,17 @@
     notifyPlatformOfNewTimer(buttonContainer.querySelector('button'))
   }
 
+  function issueTitle(issueId) {
+    const titleElement = document.querySelector(
+      '[role="textbox"][aria-label="Issue title"]'
+    )
+    if (titleElement) {
+      const title = titleElement.innerText.trim()
+      return title || issueId
+    }
+    return issueId
+  }
+
   function buildTimerForIssue(groupId, issueId) {
     const buttonContainer = document.createElement('div')
     buttonContainer.classList.add('harvest-timer-container')
@@ -111,7 +130,10 @@
     button.classList.add('harvest-timer')
     button.dataset.skipStyling = true
     button.dataset.group = JSON.stringify({ id: groupId })
-    button.dataset.item = JSON.stringify({ id: issueId, name: issueId })
+    button.dataset.item = JSON.stringify({
+      id: issueId,
+      name: issueTitle(issueId),
+    })
     buttonContainer.appendChild(button)
 
     return buttonContainer

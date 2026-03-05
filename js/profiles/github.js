@@ -38,9 +38,9 @@
         this.addTimerIfOnIssue
       )
       this.headerButton = this.createButton()
-      this.headerButton.classList.add('btn-sm')
-      this.headerButton.classList.add('mr-1')
+      this.headerButton.classList.add('Button', 'Button--secondary')
       this.commentButton = this.createButton()
+      this.commentButton.classList.add('btn')
       return new MutationObserver(this.handleMutations).observe(document.body, {
         childList: true,
         subtree: true,
@@ -48,30 +48,46 @@
     }
 
     GithubProfile.prototype.handleMutations = function (mutations) {
-      var i, len, node, removedNodes, results
-      results = []
+      var i, j, len, len1, node, mutation
       for (i = 0, len = mutations.length; i < len; i++) {
-        removedNodes = mutations[i].removedNodes
-        results.push(
-          function () {
-            var j, len1, results1
-            results1 = []
-            for (j = 0, len1 = removedNodes.length; j < len1; j++) {
-              node = removedNodes[j]
-              if (
-                this.hasBeenRemoved(node, this.headerButton) ||
-                this.hasBeenRemoved(node, this.commentButton)
-              ) {
-                results1.push(this.addTimerIfOnIssue())
-              } else {
-                results1.push(void 0)
-              }
+        mutation = mutations[i]
+
+        // Re-add the timer if the button was removed from the DOM
+        for (j = 0, len1 = mutation.removedNodes.length; j < len1; j++) {
+          node = mutation.removedNodes[j]
+          if (
+            this.hasBeenRemoved(node, this.headerButton) ||
+            this.hasBeenRemoved(node, this.commentButton)
+          ) {
+            this.addTimerIfOnIssue()
+            return
+          }
+        }
+
+        // Detect when insertion targets appear (e.g. React-rendered issue pages)
+        if (
+          !document.body.contains(this.headerButton) ||
+          !document.body.contains(this.commentButton)
+        ) {
+          for (j = 0, len1 = mutation.addedNodes.length; j < len1; j++) {
+            node = mutation.addedNodes[j]
+            if (node.nodeType !== 1) continue
+            if (
+              node.matches('[data-component="PH_Actions"]') ||
+              node.querySelector('[data-component="PH_Actions"]') ||
+              node.matches('div.gh-header-actions') ||
+              node.querySelector('div.gh-header-actions') ||
+              node.matches('#partial-new-comment-form-actions') ||
+              node.querySelector('#partial-new-comment-form-actions') ||
+              node.matches('[data-testid="markdown-editor-footer"]') ||
+              node.querySelector('[data-testid="markdown-editor-footer"]')
+            ) {
+              this.addTimerIfOnIssue()
+              return
             }
-            return results1
-          }.call(this)
-        )
+          }
+        }
       }
-      return results
     }
 
     GithubProfile.prototype.hasBeenRemoved = function (node, button) {
@@ -124,7 +140,8 @@
     GithubProfile.prototype.issueTitle = function () {
       const issueTitle =
         document.querySelector('.js-issue-title') ||
-        document.querySelector('[data-testid="issue-title"]')
+        document.querySelector('[data-testid="issue-title"]') ||
+        document.querySelector('[data-component="PH_Title"] .markdown-title')
       return issueTitle ? issueTitle.innerText : ''
     }
 
@@ -168,21 +185,26 @@
       }
 
       if ((actions = document.querySelector('div.gh-header-actions'))) {
+        this.headerButton.classList.add('Button--small')
         actions.insertBefore(this.headerButton, actions.children[0])
-      }
-
-      if (
-        (issueButton = document.querySelector(
-          '[data-component="PH_Actions"] a'
+      } else if (
+        (actions = document.querySelector(
+          '[data-component="PH_Actions"] [class*="menuActionsContainer"]'
         ))
       ) {
-        issueButton.parentNode.insertBefore(this.headerButton, issueButton)
+        this.headerButton.classList.remove('Button--small')
+        actions.prepend(this.headerButton)
+      } else if (
+        (actions = document.querySelector('[data-component="PH_Actions"]'))
+      ) {
+        this.headerButton.classList.add('Button--small')
+        actions.prepend(this.headerButton)
       }
 
       if (
         (formActions =
           document.querySelector('#partial-new-comment-form-actions') ||
-          document.querySelector('footer[class*="Footer-module__footer"]'))
+          document.querySelector('[data-testid="markdown-editor-footer"]'))
       ) {
         wrapper = document.createElement('div')
         wrapper.classList.add('bg-gray-light', 'mr-1')
@@ -196,10 +218,21 @@
       var button
       button = document.createElement('button')
       button.type = 'button'
-      button.classList.add('harvest-timer', 'btn')
+      button.classList.add('harvest-timer', 'm-0', 'mr-md-0')
+      if (document.querySelector("[data-component='PH_Actions']")) {
+        button.classList.add('mr-md-1')
+      }
       button.setAttribute('data-skip-styling', 'true')
-      button.innerHTML =
-        '<svg aria-hidden="true" class="octicon octicon-clock" height="16" role="img" version="1.1" viewBox="0 0 14 16" width="14"><path d="M8 8h3v2H7c-0.55 0-1-0.45-1-1V4h2v4z m-1-5.7c3.14 0 5.7 2.56 5.7 5.7S10.14 13.7 7 13.7 1.3 11.14 1.3 8s2.56-5.7 5.7-5.7m0-1.3C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7S10.86 1 7 1z"></path></svg>\nTrack time'
+      const buttonContent = document.createElement('span')
+      buttonContent.className = 'Button-content'
+      const buttonLabel = document.createElement('span')
+      buttonLabel.className = 'Button-label'
+      const buttonVisual = document.createElement('span')
+      buttonVisual.className = 'Button-visual Button-leadingVisual'
+      buttonVisual.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Zm7-3.25v2.992l2.028.812a.75.75 0 0 1-.557 1.392l-2.5-1A.751.751 0 0 1 7 8.25v-3.5a.75.75 0 0 1 1.5 0Z"></path></svg>`
+      buttonContent.appendChild(buttonVisual)
+      buttonContent.appendChild(buttonLabel)
+      button.appendChild(buttonContent)
       return button
     }
 
