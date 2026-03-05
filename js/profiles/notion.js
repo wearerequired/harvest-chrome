@@ -1,8 +1,8 @@
 ;(function () {
   const Selectors = {
-    PeekTopbarActions: '.notion-peek-renderer .notion-topbar-favorite-button',
+    PeekTopbarActions: '.notion-peek-renderer .notion-topbar-more-button',
     TaskName: '.notion-peek-renderer h1',
-    TopbarFavoriteButton: '.notion-topbar-favorite-button',
+    TopbarMoreButton: '.notion-topbar-more-button',
     SlidePanel: 'div.whenContentEditable[role="textbox"]',
   }
 
@@ -55,7 +55,7 @@
         if (!addedNode.matches) continue
 
         // when sidebar is opened, a new topbar is added check for that via updates button
-        if (addedNode.querySelector(Selectors.TopbarFavoriteButton)) {
+        if (addedNode.querySelector(Selectors.TopbarMoreButton)) {
           whenPeekReadyForTimer(addTimerToPeekTopBar)
         }
 
@@ -89,7 +89,13 @@
     const button = document.createElement('div')
     button.role = 'button'
     button.classList.add('harvest-timer')
-    button.setAttribute('data-item', JSON.stringify(item))
+	// Remove all HTML tags from the name attribute before stringifying.
+	item.name = item.name.replace(/<[^>]*>/g, '')
+	button.setAttribute('data-item', JSON.stringify(item))
+	// Clone the item to avoid modifying the original object
+	const itemCopy = { ...item }
+	itemCopy.name = itemCopy.name.replace(/<[^>]*>/g, '')
+	button.setAttribute('data-item', JSON.stringify(itemCopy))
     button.setAttribute('data-account', window.location.pathname.split('/')[1])
     //Group should be optional but it is for some reason required. For now we're setting it to 0 to have working profile. TODO: Investigate
     button.setAttribute('data-group', JSON.stringify({ id: 0 }))
