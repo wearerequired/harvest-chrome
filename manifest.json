@@ -140,6 +140,19 @@
 			"css": [
 				"css/helpscout.css"
 			]
+		},
+		{
+			"matches": [
+				"https://gitlab.comdesk.gmbh/*",
+				"https://gitlab.com/*"
+			],
+			"js": [
+				"js/profiles/gitlab.js",
+				"js/platform.js"
+			],
+			"css": [
+				"css/gitlab.css"
+			]
 		}
 	]
 }

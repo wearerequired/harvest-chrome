@@ -1,0 +1,16 @@
+.harvest-timer {
+	display: flex;
+	justify-content: center;
+    align-items: center;
+    min-width: 2rem;
+    min-height: 2rem;
+	border: 1px solid var(--gl-button-default-primary-border-color-default);
+	border-radius: var(--gl-button-border-radius, .25rem);
+	background-color: var(--gl-button-default-primary-background-color-default);
+    transition: background-color .2s cubic-bezier(0.22, 0.61, 0.36, 1);
+
+	&:hover {
+		border-color: var(--gl-button-default-primary-border-color-hover);
+		background-color: var(--gl-button-default-primary-background-color-hover);
+	}
+}
