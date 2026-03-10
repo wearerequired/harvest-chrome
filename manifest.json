@@ -33,8 +33,14 @@
 	},
 	"permissions": [
 		"notifications",
-		"storage"
+		"storage",
+		"scripting"
 	],
+	"optional_host_permissions": [
+		"https://*/*",
+		"http://*/*"
+	],
+	"options_page": "options.html",
 	"content_scripts": [
 		{
 			"matches": [
@@ -143,7 +149,6 @@
 		},
 		{
 			"matches": [
-				"https://gitlab.comdesk.gmbh/*",
 				"https://gitlab.com/*"
 			],
 			"js": [
