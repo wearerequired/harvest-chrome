@@ -285,29 +285,69 @@ async function getCustomMappings() {
 	return result[CUSTOM_SCRIPT_STORAGE_KEY] || {}
 }
 
-function buildCustomRegistrations(mappings) {
+async function extensionFileExists(path) {
+	try {
+		const response = await fetch(chrome.runtime.getURL(path))
+		return response.ok
+	} catch {
+		return false
+	}
+}
+
+async function getValidMappings(mappings) {
+	const validMappings = {}
+
+	for (const [matchPattern, config] of Object.entries(mappings)) {
+		const jsFiles = config.js || []
+		const cssFiles = config.css || []
+
+		const jsOk = await Promise.all(jsFiles.map(extensionFileExists))
+		const cssOk = await Promise.all(cssFiles.map(extensionFileExists))
+
+		if (jsOk.every(Boolean) && cssOk.every(Boolean)) {
+			validMappings[matchPattern] = config
+		}
+	}
+
+	return validMappings
+}
+
+async function unregisterCustomMappings() {
+	const scripts = await chrome.scripting.getRegisteredContentScripts()
+	const ids = scripts
+		.filter(script => script.id.startsWith(CUSTOM_SCRIPT_PREFIX))
+		.map(script => script.id)
+
+	if (ids.length) {
+		await chrome.scripting.unregisterContentScripts({ ids })
+	}
+}
+
+function buildRegistrations(mappings) {
 	return Object.entries(mappings).map(([matchPattern, config]) => ({
 		id: makeCustomScriptId(matchPattern),
 		matches: [matchPattern],
 		js: config.js,
 		css: config.css || [],
 		runAt: 'document_idle',
-		persistAcrossSessions: true,
+		persistAcrossSessions: true
 	}))
 }
 
-async function registerCustomMappings(mappings) {
-	const registrations = buildCustomRegistrations(mappings)
+async function applyCustomMappings(mappings) {
+	const validMappings = await getValidMappings(mappings)
+	const registrations = buildRegistrations(validMappings)
 
-	if (!registrations.length) return
+	await unregisterCustomMappings()
+
+	if (!registrations.length) {
+		return
+	}
 
 	try {
 		await chrome.scripting.registerContentScripts(registrations)
-	} catch (error) {
-		// Ignore duplicate registrations on startup
-		if (!String(error).includes('Duplicate script ID')) {
-			console.error('Custom content script registration failed', error)
-		}
+	} catch {
+		// still ignore
 	}
 }
 
@@ -315,21 +355,19 @@ async function restoreCustomMappings() {
 	const mappings = await getCustomMappings()
 	if (!Object.keys(mappings).length) return
 
-	await registerCustomMappings(mappings)
+	await applyCustomMappings(mappings)
 }
 
 async function saveCustomMappings(mappings) {
-	await registerCustomMappings(mappings)
-
 	await chrome.storage.local.set({
-		[CUSTOM_SCRIPT_STORAGE_KEY]: mappings,
+		[CUSTOM_SCRIPT_STORAGE_KEY]: mappings
 	})
+
+	await applyCustomMappings(mappings)
 }
 
-// Restore on extension start
 chrome.runtime.onStartup.addListener(restoreCustomMappings)
 
-// Restore on install/update
 chrome.runtime.onInstalled.addListener(() => {
-	restoreCustomMappings().catch(console.error)
+	restoreCustomMappings().catch(() => { })
 })

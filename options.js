@@ -20,8 +20,10 @@ function validateMapping(mapping) {
 	}
 
 	for (const [matchPattern, config] of Object.entries(mapping)) {
-		if (!/^https?:\/\/[^/]+\/\*$/.test(matchPattern)) {
-			throw new Error(`Ungültiges Match-Pattern: ${matchPattern}`);
+		if (!/^https?:\/\/[a-zA-Z0-9.-]+\/\*$/.test(matchPattern)) {
+			throw new Error(
+				`Ungültiges Match-Pattern: ${matchPattern}. Erwartet wird z. B. https://gitlab.example.com/*`
+			);
 		}
 
 		if (!config || typeof config !== 'object' || Array.isArray(config)) {
