@@ -1,7 +1,7 @@
 ; (function () {
 	const Selectors = {
-		placement: '[data-testid="work-item-type"] + .gl-flex',
-		taskName: '[data-testid="work-item-title"]',
+		placement: '[data-testid="work-item-type"] + .gl-flex, .merge-request [data-testid="title-content"] + .gl-flex',
+		taskName: '[data-testid="work-item-title"], .merge-request [data-testid="title-content"]',
 	}
 
 	const platformConfig = {
@@ -27,11 +27,11 @@
 	}
 
 	function addTimer(placementElement, taskNameElement) {
-		const name = taskNameElement.innerHTML
+		const name = taskNameElement.textContent.trim()
 		const id = window.location.pathname.split('/').pop().split('-').pop()
 		const item = { name, id }
 		const button = buildTimerButton(item)
-		const existingButton = document.querySelector('.notion-topbar .harvest-timer')
+		const existingButton = placementElement.querySelector('.harvest-timer')
 
 		if (existingButton) {
 			existingButton.replaceWith(button)
@@ -49,7 +49,7 @@
 				const [addedNode] = addedNodes
 				if (!addedNode.matches) continue
 
-				if (addedNode.matches('.work-item-detail')) {
+				if (addedNode.querySelector(`.work-item-detail ${Selectors.taskName}`)) {
 					whenReadyForTimer();
 				}
 			}

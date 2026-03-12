@@ -51,10 +51,6 @@ const messageHandlers = {
 		await processAuthCredentialsMessage(accessToken, accountId)
 	},
 	'harvest:settings': async () => settings,
-	'save-custom-content-script-mappings': async (mappings) => {
-		await saveCustomMappings(mappings)
-		return { ok: true }
-	},
 }
 
 let requestId = 0
@@ -114,9 +110,9 @@ chrome.runtime.onMessage.addListener((message, sender, respond) => {
 		if (handler) {
 			handler(value).then((result) => respond(result))
 		} else {
-			respond(null)
-		}
-	})
+				respond(null)
+			}
+		})
 
 	return true
 })
@@ -272,102 +268,146 @@ function urlBase64ToUint8Array(base64String) {
 	return outputArray
 }
 
-// Load custom JSON hosts from options.
-const CUSTOM_SCRIPT_STORAGE_KEY = 'customContentScriptMappings'
-const CUSTOM_SCRIPT_PREFIX = 'custom-mapping:'
-
-function makeCustomScriptId(matchPattern) {
-	return `${CUSTOM_SCRIPT_PREFIX}${matchPattern}`.replace(/[^a-zA-Z0-9:_-]/g, '_')
+// Manual platform activation for current tab.
+const PROFILE_ASSETS = {
+	basecamp2: {
+		js: ['js/profiles/basecamp2.js', 'js/platform.js'],
+		css: [],
+	},
+	basecamp3: {
+		js: ['js/profiles/basecamp3.js', 'js/platform.js'],
+		css: ['css/basecamp3.css'],
+	},
+	trello: {
+		js: ['js/profiles/trello.js', 'js/platform.js'],
+		css: ['css/trello.css'],
+	},
+	github: {
+		js: ['js/profiles/github.js', 'js/platform.js'],
+		css: ['css/github.css'],
+	},
+	asana: {
+		js: ['js/profiles/asana.js', 'js/platform.js'],
+		css: ['css/asana.css'],
+	},
+	linear: {
+		js: ['js/profiles/linear.js', 'js/platform.js'],
+		css: ['css/linear.css'],
+	},
+	notion: {
+		js: ['js/profiles/notion.js', 'js/platform.js'],
+		css: ['css/notion.css'],
+	},
+	monday: {
+		js: ['js/profiles/monday.js', 'js/platform.js'],
+		css: ['css/monday.css'],
+	},
+	helpscout: {
+		js: ['js/profiles/helpscout.js', 'js/platform.js'],
+		css: ['css/helpscout.css'],
+	},
+	gitlab: {
+		js: ['js/profiles/gitlab.js', 'js/platform.js'],
+		css: ['css/gitlab.css'],
+	},
 }
 
-async function getCustomMappings() {
-	const result = await chrome.storage.local.get(CUSTOM_SCRIPT_STORAGE_KEY)
-	return result[CUSTOM_SCRIPT_STORAGE_KEY] || {}
-}
-
-async function extensionFileExists(path) {
-	try {
-		const response = await fetch(chrome.runtime.getURL(path))
-		return response.ok
-	} catch {
-		return false
+async function activatePlatformForTab({ tabId, platform }) {
+	if (!tabId) {
+		return { ok: false, error: 'Kein Tab übergeben.' }
 	}
-}
 
-async function getValidMappings(mappings) {
-	const validMappings = {}
+	const assets = PROFILE_ASSETS[platform]
 
-	for (const [matchPattern, config] of Object.entries(mappings)) {
-		const jsFiles = config.js || []
-		const cssFiles = config.css || []
+	if (!assets) {
+		return { ok: false, error: `Unbekannte Plattform: ${platform}` }
+	}
 
-		const jsOk = await Promise.all(jsFiles.map(extensionFileExists))
-		const cssOk = await Promise.all(cssFiles.map(extensionFileExists))
+	try {
+		if (assets.css?.length) {
+			await chrome.scripting.insertCSS({
+				target: { tabId },
+				files: assets.css,
+			})
+		}
 
-		if (jsOk.every(Boolean) && cssOk.every(Boolean)) {
-			validMappings[matchPattern] = config
+		await chrome.scripting.executeScript({
+			target: { tabId },
+			files: assets.js,
+		})
+
+		await chrome.scripting.executeScript({
+			target: { tabId },
+			func: (activePlatform) => {
+				globalThis.__requiredManualPlatform = activePlatform
+
+				const fire = () => {
+					document.body?.dispatchEvent(new CustomEvent('harvest-event:ready'))
+				}
+
+				if (document.body) fire()
+				else document.addEventListener('DOMContentLoaded', fire, { once: true })
+			},
+			args: [platform],
+		})
+
+		return { ok: true, platform }
+	} catch (error) {
+		return {
+			ok: false,
+			error: error?.message || String(error),
 		}
 	}
-
-	return validMappings
 }
 
-async function unregisterCustomMappings() {
-	const scripts = await chrome.scripting.getRegisteredContentScripts()
-	const ids = scripts
-		.filter(script => script.id.startsWith(CUSTOM_SCRIPT_PREFIX))
-		.map(script => script.id)
-
-	if (ids.length) {
-		await chrome.scripting.unregisterContentScripts({ ids })
-	}
-}
-
-function buildRegistrations(mappings) {
-	return Object.entries(mappings).map(([matchPattern, config]) => ({
-		id: makeCustomScriptId(matchPattern),
-		matches: [matchPattern],
-		js: config.js,
-		css: config.css || [],
-		runAt: 'document_idle',
-		persistAcrossSessions: true
-	}))
-}
-
-async function applyCustomMappings(mappings) {
-	const validMappings = await getValidMappings(mappings)
-	const registrations = buildRegistrations(validMappings)
-
-	await unregisterCustomMappings()
-
-	if (!registrations.length) {
-		return
+async function getManualPlatformForTab({ tabId }) {
+	if (!tabId) {
+		return { ok: false, error: 'Kein Tab übergeben.' }
 	}
 
 	try {
-		await chrome.scripting.registerContentScripts(registrations)
+		const [result] = await chrome.scripting.executeScript({
+			target: { tabId },
+			func: () => globalThis.__requiredManualPlatform || null,
+		})
+
+		return {
+			ok: true,
+			platform: result?.result || null,
+		}
 	} catch {
-		// still ignore
+		return {
+			ok: true,
+			platform: null,
+		}
 	}
 }
 
-async function restoreCustomMappings() {
-	const mappings = await getCustomMappings()
-	if (!Object.keys(mappings).length) return
+async function clearManualPlatformAndReloadTab({ tabId }) {
+	if (!tabId) {
+		return { ok: false, error: 'Kein Tab übergeben.' }
+	}
 
-	await applyCustomMappings(mappings)
+	try {
+		await chrome.tabs.reload(tabId)
+
+		return { ok: true }
+	} catch (error) {
+		return {
+			ok: false,
+			error: error?.message || String(error),
+		}
+	}
 }
 
-async function saveCustomMappings(mappings) {
-	await chrome.storage.local.set({
-		[CUSTOM_SCRIPT_STORAGE_KEY]: mappings
-	})
-
-	await applyCustomMappings(mappings)
+messageHandlers['activate-platform-for-tab'] = async (params) => {
+	return activatePlatformForTab(params)
 }
 
-chrome.runtime.onStartup.addListener(restoreCustomMappings)
+messageHandlers['get-manual-platform-for-tab'] = async (params) => {
+	return getManualPlatformForTab(params)
+}
 
-chrome.runtime.onInstalled.addListener(() => {
-	restoreCustomMappings().catch(() => { })
-})
+messageHandlers['clear-manual-platform-and-reload-tab'] = async (params) => {
+	return clearManualPlatformAndReloadTab(params)
+}

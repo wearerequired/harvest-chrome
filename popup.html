@@ -1,28 +1,68 @@
 <!doctype html>
 <html>
-  <head>
-    <meta charset="UTF-8" />
-    <style>
-      body {
-        background: url('images/loading.gif') no-repeat center center;
-        margin: 0;
-      }
-      iframe {
-        background: #fff;
-        height: 286px;
-        visibility: hidden;
-        width: 500px;
-      }
+<head>
+	<meta charset="UTF-8" />
+	<style>
+		body {
+			background: url('images/loading.gif') no-repeat center center;
+			margin: 0;
+			font: 13px/1.4 sans-serif;
+		}
 
-      iframe.is-loaded {
-        visibility: visible;
-      }
-    </style>
+		.platform-picker-status {
+			padding: 10px;
+			background: #fff;
+			font-size: 12px;
+			white-space: pre-wrap;
+		}
 
-    <script src="js/config.js"></script>
-    <script src="js/iframe.js"></script>
-  </head>
-  <body>
-    <iframe frameborder="0"></iframe>
-  </body>
+		.platform-picker {
+			padding: 10px;
+			border-bottom: 1px solid #fa5d00;
+
+			label {
+				display: block;
+			}
+
+			.row {
+				display: flex;
+				gap: 8px;
+				align-items: center;
+				background: #fff;
+			}
+		}
+
+		.platform-picker__select {
+			flex: 1;
+			min-width: 0;
+		}
+
+		.platform-picker__active-label {
+			flex: 1;
+			min-width: 0;
+			font-weight: 600;
+		}
+
+		iframe {
+			background: #fff;
+			height: 286px;
+			visibility: hidden;
+			width: 500px;
+			display: block;
+		}
+
+		iframe.is-loaded {
+			visibility: visible;
+		}
+	</style>
+
+	<script src="js/config.js"></script>
+	<script src="js/iframe.js"></script>
+	<script src="js/platform-picker-inline.js" defer></script>
+</head>
+<body>
+	<div class="platform-picker"></div>
+
+	<iframe frameborder="0"></iframe>
+</body>
 </html>
