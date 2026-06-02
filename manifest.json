@@ -109,7 +109,7 @@
 		},
 		{
 			"matches": [
-				"https://*.notion.so/*"
+				"https://*.notion.com/*"
 			],
 			"js": [
 				"js/profiles/notion.js",
