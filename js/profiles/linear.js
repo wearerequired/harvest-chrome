@@ -57,6 +57,12 @@
     const observer = new MutationObserver(callback)
 
     observer.observe(document.body, config)
+
+    // Handle case where the issue view is already rendered before the observer started
+    const existingIssueView = document.querySelector(Selectors.IssueView)
+    if (existingIssueView) {
+      addTimerToSidebar({ target: existingIssueView })
+    }
   }
 
   function addTimerToSidebar(mutation) {
@@ -72,7 +78,7 @@
       document
         .querySelector('button[aria-label="Copy issue URL"]')
         ?.closest('div[data-contextual-menu]')
-    )?.lastElementChild
+    )?.firstElementChild?.firstElementChild
 
     if (!sideNav) {
       console.warn(
