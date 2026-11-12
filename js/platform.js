@@ -20,6 +20,8 @@ document.addEventListener("keyup", ({
 });
 function open(url, timer) {
   iframe.src = url;
+  // A dialog detached by SPA navigation while open keeps its open state, which makes showModal() throw.
+  if (dialog.open) dialog.close();
   timer.insertAdjacentElement("afterend", dialog);
   dialog.showModal();
 }
