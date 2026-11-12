@@ -1,21 +1,14 @@
 (() => {
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-var __publicField = (obj, key, value) => {
-  __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-  return value;
-};
+var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
 const iframe = document.createElement("iframe");
 iframe.id = "harvest-iframe";
 const dialog = document.createElement("dialog");
 dialog.className = "harvest-dialog";
 dialog.appendChild(iframe);
-dialog.addEventListener("click", close, {
-  capture: true
-});
-document.addEventListener("keyup", ({
-  key
-}) => key === "Escape" && close(), {
+dialog.addEventListener("click", close, { capture: true });
+document.addEventListener("keyup", ({ key }) => key === "Escape" && close(), {
   capture: true
 });
 function open(url, timer) {
@@ -124,8 +117,11 @@ const scheme = "https";
 const baseUrl = `${scheme}://${"platform.harvestapp.com"}`;
 let lastRunningTimerData;
 let xdm = document.getElementById("harvest-messaging");
-if (!document.getElementById("harvest-worker")) {
-  const worker = document.createElement("iframe");
+let worker = document.getElementById("harvest-worker");
+let platformConfig;
+const listeningTimers = /* @__PURE__ */ new WeakSet();
+if (!worker) {
+  worker = document.createElement("iframe");
   worker.hidden = true;
   worker.id = "harvest-worker";
   worker.src = `${baseUrl}/platform/worker`;
@@ -147,11 +143,41 @@ function param(params) {
   }
   return results.join("&");
 }
-function config() {
+function currentConfig() {
   if (window._harvestPlatformConfig) {
     return window._harvestPlatformConfig;
-  } else {
-    return JSON.parse(document.querySelector("script[data-platform-config]").dataset.platformConfig);
+  }
+  const configElement = document.querySelector("script[data-platform-config]");
+  if (configElement) {
+    return JSON.parse(configElement.dataset.platformConfig);
+  }
+}
+function config() {
+  const latestConfig = currentConfig();
+  if (latestConfig !== void 0) {
+    platformConfig = latestConfig;
+    return platformConfig;
+  }
+  if (platformConfig !== void 0) {
+    return platformConfig;
+  }
+  throw new Error("Harvest Platform configuration is missing");
+}
+function cacheConfig() {
+  try {
+    const latestConfig = currentConfig();
+    if (latestConfig !== void 0) {
+      platformConfig = latestConfig;
+    }
+  } catch {
+  }
+}
+function restoreElement(element, parent) {
+  const currentElement = document.getElementById(element.id);
+  if (currentElement && currentElement !== element) {
+    currentElement.replaceWith(element);
+  } else if (!element.isConnected) {
+    parent.appendChild(element);
   }
 }
 function getData(el) {
@@ -248,20 +274,14 @@ window.addEventListener("message", function(evt) {
   if (evt.data == null) {
     return;
   }
-  const {
-    type,
-    value
-  } = evt.data;
+  const { type, value } = evt.data;
   switch (type) {
     case "frame:close":
       return close();
     case "frame:resize":
       return adjustHeight(value);
     case "timer:started":
-      const {
-        id,
-        group_id
-      } = value.external_reference;
+      const { id, group_id } = value.external_reference;
       return setTimer({
         group: {
           id: group_id
@@ -275,9 +295,7 @@ window.addEventListener("message", function(evt) {
   }
 });
 let HarvestPlatform = class HarvestPlatform2 {
-  constructor({
-    stylesheet: stylesheet2
-  }) {
+  constructor({ stylesheet: stylesheet2 }) {
     // Find the timer associated with the given element
     // element - HTMLElement representing a timer
     //findTimer needs to be an arrow function to inherit `this` context from the class when calling openIframe
@@ -287,10 +305,13 @@ let HarvestPlatform = class HarvestPlatform2 {
       if (!skipStyling) {
         element.classList.add("styled");
       }
-      element.addEventListener("click", (e) => {
-        e.stopPropagation();
-        return this.openIframe(element);
-      });
+      if (!listeningTimers.has(element)) {
+        element.addEventListener("click", (e) => {
+          e.stopPropagation();
+          return this.openIframe(element);
+        });
+        listeningTimers.add(element);
+      }
       setTimer(lastRunningTimerData);
       return element.setAttribute("data-listening", true);
     });
@@ -298,10 +319,22 @@ let HarvestPlatform = class HarvestPlatform2 {
     this.findTimers = this.findTimers.bind(this);
     this.stylesheet = stylesheet2;
     const styleNode = document.createElement("style");
+    styleNode.id = "harvest-platform-styles";
     document.head.appendChild(styleNode);
     styleNode.appendChild(document.createTextNode(this.stylesheet));
     listenForEvent("harvest-event:timers:add", this.addTimers);
     listenForEvent("harvest-event:timers:chrome:add", this.findTimers);
+    cacheConfig();
+    const restoreAfterNavigation = () => {
+      restoreElement(worker, document.body);
+      restoreElement(xdm, document.body);
+      restoreElement(styleNode, document.head);
+      this.findTimers();
+    };
+    document.addEventListener("turbo:before-cache", cacheConfig);
+    document.addEventListener("turbo:render", restoreAfterNavigation);
+    document.addEventListener("turbolinks:before-cache", cacheConfig);
+    document.addEventListener("turbolinks:render", restoreAfterNavigation);
     this.findTimers();
     xdm.setAttribute("data-ready", true);
     const event = new CustomEvent("harvest-event:ready", {
@@ -321,8 +354,12 @@ let HarvestPlatform = class HarvestPlatform2 {
     }
   }
   findTimers() {
-    const elements = document.querySelectorAll(".harvest-timer:not([data-listening])");
-    return Array.from(elements, this.findTimer);
+    const elements = Array.from(
+      document.querySelectorAll(".harvest-timer")
+    ).filter(
+      (element) => !element.hasAttribute("data-listening") || !listeningTimers.has(element)
+    );
+    return elements.map(this.findTimer);
   }
   // Open a timer dialog for the given timer and pass the given timer data
   // timer - HTMLElement representing the harvest-timer
@@ -342,7 +379,10 @@ let HarvestPlatform = class HarvestPlatform2 {
       default_project_code: (_f = data.default) == null ? void 0 : _f.project_code,
       default_project_name: (_g = data.default) == null ? void 0 : _g.project_name
     };
-    return open(`${baseUrl}/platform/timer?${param(getParams)}`, element);
+    return open(
+      `${baseUrl}/platform/timer?${param(getParams)}`,
+      element
+    );
   }
 };
 if (window.postMessage == null) {
@@ -356,9 +396,7 @@ supported by your browser.`);
 } else if (self.HarvestPlatform != null) {
   self.HarvestPlatform.findTimers();
 } else {
-  self.HarvestPlatform = new HarvestPlatform({
-    stylesheet
-  });
+  self.HarvestPlatform = new HarvestPlatform({ stylesheet });
 }
 //# sourceMappingURL=platform.js.map
 })()

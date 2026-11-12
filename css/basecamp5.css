@@ -1,0 +1,73 @@
+/* Scoped to Basecamp 5 pages (marker set by basecamp5.js) so these rules never
+   leak onto classic Basecamp 3 pages, with which this file shares 3.basecamp.com. */
+.harvest-basecamp5 div.harvest-timer.styled {
+  font-size: inherit;
+  width: 24px;
+  height: 24px;
+  border-radius: 5px;
+  margin-right: 7px;
+  position: relative;
+}
+
+.harvest-basecamp5 .todo__content div.harvest-timer.styled,
+.harvest-basecamp5 .todos.remaining div.harvest-timer.styled {
+  width: 1.4em;
+  height: 1.4em;
+  border-radius: 0.3em;
+  margin-right: 3px;
+  vertical-align: middle;
+}
+
+.harvest-basecamp5 .todolist__title div.harvest-timer.styled {
+  vertical-align: baseline;
+}
+
+.harvest-basecamp5 div.harvest-timer.styled .harvest-timer-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.harvest-basecamp5 .perma-toolbar__actions .btn.harvest-timer {
+  display: inline-flex;
+  align-items: center;
+}
+
+.harvest-basecamp5 .btn.harvest-timer .harvest-timer-icon {
+  margin: 0 0.4rem 0 0;
+}
+
+.harvest-basecamp5 .btn.harvest-timer .stopped-text {
+  display: inline;
+}
+
+.harvest-basecamp5 .btn.harvest-timer .running-text {
+  display: none;
+}
+
+.harvest-basecamp5 .btn.harvest-timer.running {
+  background-color: #409ad7;
+  border-color: #0060a4;
+  color: #fff;
+}
+
+.harvest-basecamp5 .btn.harvest-timer.running:hover {
+  background-color: #3393d4;
+}
+
+.harvest-basecamp5 .btn.harvest-timer.running:active {
+  background-color: #006fba;
+}
+
+.harvest-basecamp5 .btn.harvest-timer.running .stopped-text {
+  display: none;
+}
+
+.harvest-basecamp5 .btn.harvest-timer.running .running-text {
+  display: inline;
+}
+
+.harvest-basecamp5 .btn.harvest-timer.running .harvest-timer-icon {
+  background-position: -12px 0px;
+}
