@@ -138,11 +138,31 @@
     }
 
     GithubProfile.prototype.issueTitle = function () {
+      // The PR view's PH_Title lives in the compact sticky header, which is
+      // rendered lazily and can still hold the previous page's title, so the
+      // main header's heading is checked first.
       const issueTitle =
+        document.querySelector(
+          '[data-component="PageHeader"]:not([class*="stickyHeader"]) h1 .markdown-title'
+        ) ||
         document.querySelector('.js-issue-title') ||
         document.querySelector('[data-testid="issue-title"]') ||
         document.querySelector('[data-component="PH_Title"] .markdown-title')
-      return issueTitle ? issueTitle.innerText : ''
+      return issueTitle ? issueTitle.textContent.trim() : ''
+    }
+
+    // The title may not be rendered yet when the button is inserted, so it is
+    // resolved again right before platform.js reads data-item on click.
+    GithubProfile.prototype.refreshItemName = function (button) {
+      var item, title
+      try {
+        item = JSON.parse(button.dataset.item)
+      } catch (error) {
+        return
+      }
+      if (!item || !(title = this.issueTitle())) return
+      item.name = '#' + item.id + ': ' + title
+      button.dataset.item = JSON.stringify(item)
     }
 
     GithubProfile.prototype.addTimer = function (data) {
@@ -228,6 +248,8 @@
         button.classList.add('mr-md-1')
       }
       button.setAttribute('data-skip-styling', 'true')
+      // Registered before platform.js attaches its handler, so it runs first.
+      button.addEventListener('click', () => this.refreshItemName(button))
       const buttonContent = document.createElement('span')
       buttonContent.className = 'Button-content'
       const buttonLabel = document.createElement('span')
