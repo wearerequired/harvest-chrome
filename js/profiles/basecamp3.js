@@ -152,6 +152,7 @@
       var page
       page = document.querySelector('.panel')
       if (
+        page &&
         page.querySelector('.recordable--todo') &&
         !page.querySelector('.harvest-timer')
       ) {
@@ -388,13 +389,36 @@
     }
 
     Basecamp3Profile.prototype.notifyPlatformOfNewTimers = function () {
-      var evt
-      evt = new CustomEvent('harvest-event:timers:chrome:add')
-      return this.platformXDMElement.dispatchEvent(evt)
+      var messagingElement
+      messagingElement = document.querySelector('#harvest-messaging')
+      if (messagingElement) {
+        messagingElement.dispatchEvent(
+          new CustomEvent('harvest-event:timers:chrome:add')
+        )
+      }
+      if (
+        this.platformXDMElement &&
+        this.platformXDMElement !== messagingElement
+      ) {
+        return this.platformXDMElement.dispatchEvent(
+          new CustomEvent('harvest-event:timers:chrome:add')
+        )
+      }
     }
 
     return Basecamp3Profile
   })()
 
-  new Basecamp3Profile()
+  // This profile is also injected on 3.basecamp.com for Basecamp 5 accounts,
+  // which are rendered by Turbo/Hotwire (see basecamp5.js). Its Basecamp 3
+  // selectors match nothing there, so skip it — basecamp5.js owns those pages.
+  // The turbo markers are present in the static DOM, so this check is safe to
+  // run before the deferred platform script is injected below.
+  var isBasecamp5Page = !!(
+    document.querySelector('meta[name="turbo-root"]') ||
+    document.querySelector('turbo-frame')
+  )
+  if (!isBasecamp5Page) {
+    new Basecamp3Profile()
+  }
 }).call(this)

@@ -16,16 +16,25 @@
 
   const settings = {}
 
+  const TimerButtonId = 'harvest-asana-timer'
+
+  // Asana's redesigned task pane and spreadsheet grid replaced their semantic
+  // class names with hashed CSS-module ones, so every anchor keeps its original
+  // selector first and falls back to a hook that survived the redesign.
   const Selectors = {
-    CopyLinkButton: '.TaskPaneToolbar-copyLinkButton',
+    CopyLinkButton:
+      '.TaskPaneToolbar-copyLinkButton, .TaskPaneToolbar-controls [aria-label="Copy task link"]',
     HarvestTimer: '.harvest-timer',
     Task: '.TaskPane[role=dialog]',
-    TaskWrapper: '.TaskPane-focusTrap',
+    TaskWrapper: '.TaskPane-focusTrap, .TaskPane',
     Toolbar: '.TaskPaneToolbar',
+    ToolbarControls: '.TaskPaneToolbar-controls',
     ProjectName: '.ProjectPageHeader h1',
     SpreadsheetHeader: '.SpreadsheetHeaderLeftStructure',
-    SpreadsheetHeaderPreload: '.SpreadsheetHeaderStructure',
-    SpreadsheetGridScroller: '.SpreadsheetGridScroller-container',
+    SpreadsheetHeaderPreload:
+      '.SpreadsheetHeaderStructure, .SpreadsheetHeaderLeftStructure',
+    SpreadsheetGridScroller:
+      '.SpreadsheetGridScroller-container, .StandardGridScroller-container',
     SpreadsheetTaskName: '.SpreadsheetRow .SpreadsheetTaskName',
     SpreadsheetButtonArea:
       '.SpreadsheetGridTaskNameAndDetailsCellGroup-detailsButtonClickArea',
@@ -45,39 +54,34 @@
     [ViewContext.boardView]: Selectors.BoardCard,
   }
 
-  function onNodeAdded(element) {
-    const { classList } = element
-    if (classList.contains('TaskPane-focusTrap')) {
-      addTimerAndTotalHoursToTaskDetail()
-    } else if (
-      classList.contains('SpreadsheetHeaderStructure') ||
-      classList.contains('SpreadsheetGridScroller-container')
-    ) {
-      addTotalHoursToList()
-    } else if (classList.contains('Board')) {
-      addTotalHoursToBoard()
-    }
-  }
-
-  function createObserverForSelector(selector, onMatchingNode) {
+  function createObserverForSelector(
+    selector,
+    onMatchingNode,
+    { matchDescendants = false } = {}
+  ) {
     return new MutationObserver((mutationsList, _) => {
       for (const mutation of mutationsList) {
         if (mutation.type === 'childList') {
           for (const node of mutation.addedNodes) {
-            if (node.nodeType === 1 && node.matches(selector)) {
-              onMatchingNode(node)
-            }
+            if (node.nodeType !== 1) continue
+
+            // Asana mounts a whole view as a single subtree, so the element we
+            // look for is usually a descendant of the node that was added.
+            const matched = matchDescendants
+              ? node.matches(selector) || node.querySelector(selector)
+              : node.matches(selector)
+
+            if (matched) onMatchingNode(node)
           }
         }
       }
     })
   }
 
-  function observeElement(selector) {
-    createObserverForSelector(selector, onNodeAdded).observe(document.body, {
-      childList: true,
-      subtree: true,
-    })
+  function observeElement(selector, onMatchingNode) {
+    createObserverForSelector(selector, onMatchingNode, {
+      matchDescendants: true,
+    }).observe(document.body, { childList: true, subtree: true })
   }
 
   function observeElementAndContents(containerSelector, context) {
@@ -101,7 +105,8 @@
     const parentObserver = createObserverForSelector(
       containerSelector,
       (node) =>
-        contentObserver.observe(node, { childList: true, subtree: true })
+        contentObserver.observe(node, { childList: true, subtree: true }),
+      { matchDescendants: true }
     )
 
     parentObserver.observe(document.body, { childList: true, subtree: true })
@@ -146,13 +151,13 @@
 
     if (!Object.keys(settings).length) return
 
-    observeElement(Selectors.SpreadsheetHeaderPreload) // watch for header on list view
+    observeElement(Selectors.SpreadsheetHeaderPreload, addTotalHoursToList) // watch for header on list view
     observeElementAndContents(Selectors.Board, ViewContext.boardView) // watch for tasks on board view (initial or pagination)
     observeElementAndContents(
       Selectors.SpreadsheetGridScroller,
       ViewContext.listView
     ) // watch for tasks on list view (initial or pagination)
-    observeElement(Selectors.TaskWrapper) // watch for task detail view
+    observeElement(Selectors.TaskWrapper, addTimerAndTotalHoursToTaskDetail) // watch for task detail view
 
     // initial render
     addTotalHoursToList()
@@ -326,20 +331,28 @@
 
   async function addTotalHoursToTaskPane(taskPane) {
     const taskId = taskPane.dataset.taskId
-    const totalHoursEl = await totalHoursElement(taskId, 'taskDetailView')
     const taskPaneFields = taskPane.querySelector('.TaskPaneFields')
 
-    if (!taskPaneFields.querySelector('a[role="button"]')) {
-      const row = document.createElement('div')
-      row.innerHTML = paneHoursElement
-      row.firstElementChild
-        .querySelector('.LabeledRowStructure-content')
-        .appendChild(totalHoursEl)
-      taskPaneFields.insertBefore(
-        row.firstElementChild,
-        taskPaneFields.lastElementChild
-      )
+    if (!taskPaneFields) return
+
+    // The pane is re-rendered often, and every render re-runs this, so skip
+    // before fetching hours once the row is in place.
+    if (
+      taskPaneFields.querySelector('[data-harvest-platform-external-item-id]')
+    ) {
+      return
     }
+
+    const totalHoursEl = await totalHoursElement(taskId, 'taskDetailView')
+    const row = document.createElement('div')
+    row.innerHTML = paneHoursElement
+    row.firstElementChild
+      .querySelector('.LabeledRowStructure-content')
+      .appendChild(totalHoursEl)
+    taskPaneFields.insertBefore(
+      row.firstElementChild,
+      taskPaneFields.lastElementChild
+    )
 
     updateTotalHoursElement(taskId)
   }
@@ -382,6 +395,8 @@
   function addTimerToTask(taskPane) {
     const toolbar = taskPane.querySelector(Selectors.Toolbar)
 
+    if (!toolbar || toolbar.querySelector(`#${TimerButtonId}`)) return
+
     const nativeButton = toolbar.querySelector(Selectors.HarvestTimer)
 
     if (nativeButton) {
@@ -392,10 +407,18 @@
     const copyLinkButton = toolbar.querySelector(Selectors.CopyLinkButton)
     const timerButton = buildTimerButtonForTask(taskPane)
 
-    copyLinkButton.parentNode.insertBefore(
-      timerButton,
-      copyLinkButton.nextSibling
-    )
+    if (copyLinkButton) {
+      copyLinkButton.parentNode.insertBefore(
+        timerButton,
+        copyLinkButton.nextSibling
+      )
+    } else {
+      const toolbarControls = toolbar.querySelector(Selectors.ToolbarControls)
+
+      if (!toolbarControls) return
+
+      toolbarControls.prepend(timerButton)
+    }
 
     notifyPlatformOfNewTimer(timerButton)
   }
@@ -430,7 +453,7 @@
     button.setAttribute('data-group', JSON.stringify({ id: 0 }))
     button.setAttribute('data-item', JSON.stringify(metadata))
 
-    button.id = 'harvest-asana-timer'
+    button.id = TimerButtonId
     button.role = 'button'
     button.setAttribute('data-skip-styling', true)
     button.classList.add(

@@ -71,14 +71,14 @@
       .split('//')[1]
       .split('/')
 
-    const sideNav = (
-      document.querySelector(
-        'div[data-contextual-menu]:has([data-detail-button="true"])'
-      ) ||
-      document
-        .querySelector('button[aria-label="Copy issue URL"]')
-        ?.closest('div[data-contextual-menu]')
-    )?.firstElementChild?.firstElementChild
+    const propertiesSection = Array.from(
+      document.querySelectorAll('[data-details-pane-section-content="true"]')
+    ).find(
+      (section) =>
+        section.parentElement?.firstElementChild?.textContent.trim() ===
+        'Properties'
+    )
+    const sideNav = propertiesSection?.parentElement?.parentElement
 
     if (!sideNav) {
       console.warn(

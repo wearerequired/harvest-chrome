@@ -278,6 +278,10 @@ const PROFILE_ASSETS = {
 		js: ['js/profiles/basecamp3.js', 'js/platform.js'],
 		css: ['css/basecamp3.css'],
 	},
+	basecamp5: {
+		js: ['js/profiles/basecamp5.js', 'js/platform.js'],
+		css: ['css/basecamp5.css'],
+	},
 	trello: {
 		js: ['js/profiles/trello.js', 'js/platform.js'],
 		css: ['css/trello.css'],

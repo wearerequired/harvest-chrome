@@ -1,6 +1,6 @@
 ; (function () {
 	const Selectors = {
-		placement: '[data-testid="work-item-type"] + .gl-flex, .merge-request [data-testid="title-content"] + .gl-flex',
+		placement: '.work-item-detail [data-testid="page-heading-actions"], [data-testid="work-item-type"] + .gl-flex, .merge-request [data-testid="title-content"] + .gl-flex',
 		taskName: '[data-testid="work-item-title"], .merge-request [data-testid="title-content"]',
 	}
 

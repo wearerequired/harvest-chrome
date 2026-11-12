@@ -1,6 +1,6 @@
 {
 	"update_url": "https://clients2.google.com/service/update2/crx",
-	"version": "4.1.34.1",
+	"version": "4.1.40.1",
 	"name": "required Time Tracker",
 	"description": "Track time from Chrome and within popular project management tools.",
 	"author": "required gmbh",
@@ -53,10 +53,24 @@
 			],
 			"js": [
 				"js/profiles/basecamp3.js",
+				"js/profiles/basecamp5.js",
 				"js/platform.js"
 			],
 			"css": [
-				"css/basecamp3.css"
+				"css/basecamp3.css",
+				"css/basecamp5.css"
+			]
+		},
+		{
+			"matches": [
+				"https://app.basecamp.com/*"
+			],
+			"js": [
+				"js/profiles/basecamp5.js",
+				"js/platform.js"
+			],
+			"css": [
+				"css/basecamp5.css"
 			]
 		},
 		{
@@ -109,6 +123,7 @@
 		},
 		{
 			"matches": [
+				"https://*.notion.so/*",
 				"https://*.notion.com/*"
 			],
 			"js": [
