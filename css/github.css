@@ -25,6 +25,11 @@
   font-size: 14px;
 }
 
+/* GitHub hides the PR header actions (d-none) when it has nothing to show there. */
+[data-component='PH_Actions']:has(> .harvest-timer) {
+  display: flex !important;
+}
+
 .harvest-dialog[open] {
   position: fixed !important;
 }

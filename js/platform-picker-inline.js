@@ -3,6 +3,7 @@ const platformPickerContainer = document.querySelector('.platform-picker')
 const PLATFORMS = {
 	basecamp2: 'Basecamp 2',
 	basecamp3: 'Basecamp 3',
+	basecamp5: 'Basecamp 5',
 	trello: 'Trello',
 	github: 'GitHub',
 	asana: 'Asana',
@@ -44,6 +45,7 @@ function isManifestHandledHost(hostname) {
 	return (
 		hostname === 'basecamp.com' ||
 		hostname === '3.basecamp.com' ||
+		hostname === 'app.basecamp.com' ||
 		hostname === 'trello.com' ||
 		hostname === 'github.com' ||
 		hostname === 'app.asana.com' ||
@@ -51,6 +53,7 @@ function isManifestHandledHost(hostname) {
 		hostname === 'secure.helpscout.net' ||
 		hostname === 'gitlab.com' ||
 		hostname.endsWith('.notion.so') ||
+		hostname.endsWith('.notion.com') ||
 		hostname.endsWith('.monday.com')
 	)
 }
