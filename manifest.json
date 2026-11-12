@@ -1,5 +1,10 @@
 {
-	"update_url": "https://clients2.google.com/service/update2/crx",
+	"browser_specific_settings": {
+		"gecko": {
+			"id": "harvest-timer@required.ch",
+			"strict_min_version": "109.0"
+		}
+	},
 	"version": "4.1.34.1",
 	"name": "required Time Tracker",
 	"description": "Track time from Chrome and within popular project management tools.",
@@ -26,7 +31,8 @@
 		}
 	},
 	"background": {
-		"service_worker": "service-worker.js"
+		"service_worker": "service-worker.js",
+		"scripts": ["js/config.js", "service-worker.js"]
 	},
 	"content_security_policy": {
 		"extension_pages": "script-src 'self'; object-src 'self'"

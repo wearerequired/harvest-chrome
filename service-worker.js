@@ -1,4 +1,6 @@
-importScripts('./js/config.js')
+// Firefox runs this file as an event page that already loads config.js via
+// background.scripts; only Chrome's service worker has to import it.
+if (typeof importScripts === 'function') importScripts('./js/config.js')
 
 // Creates a storage object with access and mutate methods
 // that uses the Chrome storage API under the hood
@@ -217,6 +219,8 @@ const getWebsocketToken = async (accessToken, accountId) => {
 }
 
 const getSubscription = async () => {
+	if (!self.registration?.pushManager) return null
+
 	let subscription = await self.registration.pushManager.getSubscription()
 
 	if (subscription) {
@@ -225,16 +229,20 @@ const getSubscription = async () => {
 
 	convertedVapidKey = urlBase64ToUint8Array(settings.vapid_public_key)
 
-	const chromeVersion = parseInt(
-		navigator.userAgentData.brands.find(
-			(brand) => brand.brand === 'Google Chrome'
-		).version,
-		10
-	)
+	let userVisibleOnly = true
+	if (navigator.userAgentData) {
+		const chromeVersion = parseInt(
+			navigator.userAgentData.brands.find(
+				(brand) => brand.brand === 'Google Chrome'
+			)?.version ?? '0',
+			10
+		)
+		userVisibleOnly = chromeVersion < 121
+	}
 
 	subscription = await self.registration.pushManager.subscribe({
 		applicationServerKey: convertedVapidKey,
-		userVisibleOnly: chromeVersion < 121,
+		userVisibleOnly,
 	})
 
 	return subscription
