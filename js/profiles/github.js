@@ -37,7 +37,10 @@
         'harvest-event:ready',
         this.addTimerIfOnIssue
       )
-      this.renewButtons()
+      this.headerButton = this.createButton()
+      this.headerButton.classList.add('Button', 'Button--secondary')
+      this.commentButton = this.createButton()
+      this.commentButton.classList.add('btn')
       return new MutationObserver(this.handleMutations).observe(document.body, {
         childList: true,
         subtree: true,
@@ -85,51 +88,6 @@
           }
         }
       }
-    }
-
-    // platform.js attaches its click handler and applies the running state
-    // only once per element. Reusing a button across issues would either stack
-    // click handlers (opening the dialog twice breaks showModal) or keep the
-    // running state of the previous issue, so each issue gets fresh buttons.
-    GithubProfile.prototype.renewButtons = function () {
-      this.headerButton = this.createButton()
-      this.headerButton.classList.add('Button', 'Button--secondary')
-      this.commentButton = this.createButton()
-      this.commentButton.classList.add('btn')
-      this.commentWrapper = document.createElement('div')
-      this.commentWrapper.classList.add(
-        'harvest-timer-wrapper',
-        'bg-gray-light',
-        'mr-1'
-      )
-      this.commentWrapper.appendChild(this.commentButton)
-    }
-
-    GithubProfile.prototype.headerActions = function () {
-      var actions
-      if ((actions = document.querySelector('div.gh-header-actions'))) {
-        return { element: actions, small: true }
-      }
-      // The PR view renders a second, compact PageHeader that only shows up
-      // while scrolling; the button belongs into the main one.
-      var mainHeader =
-        '[data-component="PageHeader"]:not([class*="stickyHeader"]) '
-      if (
-        (actions = document.querySelector(
-          mainHeader +
-            '[data-component="PH_Actions"] [class*="menuActionsContainer"]'
-        ))
-      ) {
-        return { element: actions, small: false }
-      }
-      if (
-        (actions =
-          document.querySelector(mainHeader + '[data-component="PH_Actions"]') ||
-          document.querySelector('[data-component="PH_Actions"]'))
-      ) {
-        return { element: actions, small: true }
-      }
-      return null
     }
 
     GithubProfile.prototype.hasBeenRemoved = function (node, button) {
@@ -188,7 +146,23 @@
     }
 
     GithubProfile.prototype.addTimer = function (data) {
-      var account, actions, formActions, group, item, name, permalink
+      var account,
+        actions,
+        el,
+        formActions,
+        group,
+        i,
+        issueButton,
+        item,
+        len,
+        name,
+        permalink,
+        ref,
+        wrapper
+      for (name in data) {
+        this.headerButton.dataset[name] = this.commentButton.dataset[name] =
+          JSON.stringify(data[name])
+      }
       ;(account = data.account), (group = data.group), (item = data.item)
       permalink =
         'https://github.com/' +
@@ -197,37 +171,50 @@
         group.id +
         '/issues/' +
         item.id
-      if (this.headerButton.dataset.permalink !== permalink) {
-        this.renewButtons()
-      }
-      for (name in data) {
-        this.headerButton.dataset[name] = this.commentButton.dataset[name] =
-          JSON.stringify(data[name])
-      }
+      this.headerButton.removeAttribute('data-listening')
       this.headerButton.setAttribute('data-permalink', permalink)
+      this.commentButton.removeAttribute('data-listening')
       this.commentButton.setAttribute('data-permalink', permalink)
+      ref = document.querySelectorAll('.harvest-timer')
 
-      document.querySelectorAll('.harvest-timer').forEach((el) => {
+      for (i = 0, len = ref.length; i < len; i++) {
+        el = ref[i]
         if (el !== this.headerButton && el !== this.commentButton) {
-          ;(el.closest('.harvest-timer-wrapper') || el).remove()
+          el.remove()
         }
-      })
+      }
 
-      if ((actions = this.headerActions())) {
-        this.headerButton.classList.toggle('Button--small', actions.small)
-        if (actions.element.firstElementChild !== this.headerButton) {
-          actions.element.prepend(this.headerButton)
-        }
+      if ((actions = document.querySelector('div.gh-header-actions'))) {
+        this.headerButton.classList.add('Button--small')
+        actions.insertBefore(this.headerButton, actions.children[0])
+      } else if (
+        (actions = document.querySelector(
+          '[data-component="PH_Actions"] [class*="menuActionsContainer"]'
+        ))
+      ) {
+        this.headerButton.classList.remove('Button--small')
+        actions.prepend(this.headerButton)
+      } else if (
+        // The PR view renders a second, compact PageHeader that only shows up
+        // while scrolling; the button belongs into the main one.
+        (actions =
+          document.querySelector(
+            '[data-component="PageHeader"]:not([class*="stickyHeader"]) [data-component="PH_Actions"]'
+          ) || document.querySelector('[data-component="PH_Actions"]'))
+      ) {
+        this.headerButton.classList.add('Button--small')
+        actions.prepend(this.headerButton)
       }
 
       if (
         (formActions =
           document.querySelector('#partial-new-comment-form-actions') ||
-          document.querySelector('[data-testid="markdown-editor-footer"]')) &&
-        formActions.children[0] &&
-        formActions.children[0].firstElementChild !== this.commentWrapper
+          document.querySelector('[data-testid="markdown-editor-footer"]'))
       ) {
-        formActions.children[0].prepend(this.commentWrapper)
+        wrapper = document.createElement('div')
+        wrapper.classList.add('bg-gray-light', 'mr-1')
+        wrapper.appendChild(this.commentButton)
+        formActions.children[0].prepend(wrapper)
       }
       return this.notifyPlatformOfNewTimers()
     }
