@@ -125,7 +125,7 @@
       return this.addTimer({
         item: {
           id: item,
-          name: '#' + item + ': ' + this.issueTitle(),
+          name: '#' + item + ': ' + this.issueTitle(item),
         },
         group: {
           id: group,
@@ -137,18 +137,36 @@
       })
     }
 
-    GithubProfile.prototype.issueTitle = function () {
-      // The PR view's PH_Title lives in the compact sticky header, which is
-      // rendered lazily and can still hold the previous page's title, so the
-      // main header's heading is checked first.
+    GithubProfile.prototype.issueTitle = function (id) {
+      // The PR view's PH_Title lives in the compact sticky header (an h2),
+      // which is rendered lazily and can still hold the previous page's
+      // title, so the main header's h1 is checked first. Primer's
+      // data-component attributes are matched because the class names are
+      // hashed and differ between users.
       const issueTitle =
         document.querySelector(
-          '[data-component="PageHeader"]:not([class*="stickyHeader"]) h1 .markdown-title'
+          '[data-component="PageHeader"] h1[data-component="Heading"] > [data-component="Text"]'
         ) ||
         document.querySelector('.js-issue-title') ||
         document.querySelector('[data-testid="issue-title"]') ||
         document.querySelector('[data-component="PH_Title"] .markdown-title')
-      return issueTitle ? issueTitle.textContent.trim() : ''
+      return issueTitle
+        ? issueTitle.textContent.trim()
+        : this.titleFromDocument(id)
+    }
+
+    // Last resort when GitHub renames its markup again: the page title reads
+    // "<title> by <author> · Pull Request #<id> · <repo>" or
+    // "<title> · Issue #<id> · <repo>". The id check guards against a title
+    // that is not yet updated after a soft navigation.
+    GithubProfile.prototype.titleFromDocument = function (id) {
+      var match = document.title.match(
+        /^(.*) · (Pull Request|Issue) #(\d+) · [^·]+$/
+      )
+      if (!match || match[3] !== String(id)) return ''
+      return match[2] === 'Pull Request'
+        ? match[1].replace(/ by [^ ]+$/, '')
+        : match[1]
     }
 
     // The title may not be rendered yet when the button is inserted, so it is
@@ -160,7 +178,7 @@
       } catch (error) {
         return
       }
-      if (!item || !(title = this.issueTitle())) return
+      if (!item || !(title = this.issueTitle(item.id))) return
       item.name = '#' + item.id + ': ' + title
       button.dataset.item = JSON.stringify(item)
     }
@@ -215,11 +233,12 @@
         this.headerButton.classList.remove('Button--small')
         actions.prepend(this.headerButton)
       } else if (
-        // The PR view renders a second, compact PageHeader that only shows up
-        // while scrolling; the button belongs into the main one.
+        // The PR view renders a second, compact PageHeader (with an h2 title)
+        // that only shows up while scrolling; the button belongs into the main
+        // one, which carries the h1.
         (actions =
           document.querySelector(
-            '[data-component="PageHeader"]:not([class*="stickyHeader"]) [data-component="PH_Actions"]'
+            '[data-component="PageHeader"]:has(h1) [data-component="PH_Actions"]'
           ) || document.querySelector('[data-component="PH_Actions"]'))
       ) {
         this.headerButton.classList.add('Button--small')
