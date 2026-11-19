@@ -125,7 +125,7 @@
       return this.addTimer({
         item: {
           id: item,
-          name: '#' + item + ': ' + this.issueTitle(),
+          name: '#' + item + ': ' + this.issueTitle(item),
         },
         group: {
           id: group,
@@ -137,18 +137,35 @@
       })
     }
 
-    GithubProfile.prototype.issueTitle = function () {
+    GithubProfile.prototype.issueTitle = function (id) {
       // The PR view's PH_Title lives in the compact sticky header, which is
       // rendered lazily and can still hold the previous page's title, so the
-      // main header's heading is checked first.
+      // main header's heading is checked first. Its class is a hashed CSS
+      // module name (markdownTitle__…) for users who can edit the title.
       const issueTitle =
         document.querySelector(
-          '[data-component="PageHeader"]:not([class*="stickyHeader"]) h1 .markdown-title'
+          '[data-component="PageHeader"]:not([class*="stickyHeader"]) h1 :is(.markdown-title, [class*="markdownTitle"])'
         ) ||
         document.querySelector('.js-issue-title') ||
         document.querySelector('[data-testid="issue-title"]') ||
         document.querySelector('[data-component="PH_Title"] .markdown-title')
-      return issueTitle ? issueTitle.textContent.trim() : ''
+      return issueTitle
+        ? issueTitle.textContent.trim()
+        : this.titleFromDocument(id)
+    }
+
+    // Last resort when GitHub renames its markup again: the page title reads
+    // "<title> by <author> · Pull Request #<id> · <repo>" or
+    // "<title> · Issue #<id> · <repo>". The id check guards against a title
+    // that is not yet updated after a soft navigation.
+    GithubProfile.prototype.titleFromDocument = function (id) {
+      var match = document.title.match(
+        /^(.*) · (Pull Request|Issue) #(\d+) · [^·]+$/
+      )
+      if (!match || match[3] !== String(id)) return ''
+      return match[2] === 'Pull Request'
+        ? match[1].replace(/ by [^ ]+$/, '')
+        : match[1]
     }
 
     // The title may not be rendered yet when the button is inserted, so it is
@@ -160,7 +177,7 @@
       } catch (error) {
         return
       }
-      if (!item || !(title = this.issueTitle())) return
+      if (!item || !(title = this.issueTitle(item.id))) return
       item.name = '#' + item.id + ': ' + title
       button.dataset.item = JSON.stringify(item)
     }
