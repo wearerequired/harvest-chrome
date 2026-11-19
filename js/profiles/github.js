@@ -138,13 +138,14 @@
     }
 
     GithubProfile.prototype.issueTitle = function (id) {
-      // The PR view's PH_Title lives in the compact sticky header, which is
-      // rendered lazily and can still hold the previous page's title, so the
-      // main header's heading is checked first. Its class is a hashed CSS
-      // module name (markdownTitle__…) for users who can edit the title.
+      // The PR view's PH_Title lives in the compact sticky header (an h2),
+      // which is rendered lazily and can still hold the previous page's
+      // title, so the main header's h1 is checked first. Primer's
+      // data-component attributes are matched because the class names are
+      // hashed and differ between users.
       const issueTitle =
         document.querySelector(
-          '[data-component="PageHeader"]:not([class*="stickyHeader"]) h1 :is(.markdown-title, [class*="markdownTitle"])'
+          '[data-component="PageHeader"] h1[data-component="Heading"] > [data-component="Text"]'
         ) ||
         document.querySelector('.js-issue-title') ||
         document.querySelector('[data-testid="issue-title"]') ||
@@ -232,11 +233,12 @@
         this.headerButton.classList.remove('Button--small')
         actions.prepend(this.headerButton)
       } else if (
-        // The PR view renders a second, compact PageHeader that only shows up
-        // while scrolling; the button belongs into the main one.
+        // The PR view renders a second, compact PageHeader (with an h2 title)
+        // that only shows up while scrolling; the button belongs into the main
+        // one, which carries the h1.
         (actions =
           document.querySelector(
-            '[data-component="PageHeader"]:not([class*="stickyHeader"]) [data-component="PH_Actions"]'
+            '[data-component="PageHeader"]:has(h1) [data-component="PH_Actions"]'
           ) || document.querySelector('[data-component="PH_Actions"]'))
       ) {
         this.headerButton.classList.add('Button--small')
